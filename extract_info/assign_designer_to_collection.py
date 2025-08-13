@@ -3,6 +3,33 @@ import re
 import ahocorasick  
 import unicodedata
 from thefuzz import fuzz, process
+import numpy as np
+from collections import Counter
+import json
+
+
+from collections import defaultdict
+
+def fashion_house_designer_periods(df):
+    # First explode designer_name so each designer has its own row
+    df_exp = df.explode("designer_name")
+    
+    # Remove None or empty string designers if any
+    df_exp = df_exp[df_exp["designer_name"].notna() & (df_exp["designer_name"] != "")]
+    
+    # Group by fashion_house and designer_name, aggregate min and max year
+    grouped = df_exp.groupby(["fashion_house", "designer_name"])["year"].agg(["min", "max"]).reset_index()
+    
+    # Build dictionary with desired structure
+    result = defaultdict(list)
+    for _, row in grouped.iterrows():
+        result[row["fashion_house"]].append({
+            "designer": row["designer_name"],
+            "start_year": int(row["min"]),
+            "end_year": int(row["max"])
+        })
+    return dict(result)
+
 
 def to_list(x):
     if isinstance(x, list):
@@ -156,17 +183,24 @@ def any_name_in_designers(names, designer_list):
 
 
 
-def clean_and_merge_names(name_set, threshold=90):
+from collections import Counter
+from fuzzywuzzy import fuzz
+
+def clean_and_merge_names(name_set, threshold=90, min_count=1):
     # Step 1: Remove None, empty, whitespace-only
-    cleaned = {n.strip() for n in name_set if n and n.strip()}
+    cleaned = [n.strip() for n in name_set if n and n.strip()]
     
     # Step 2: Convert to title case
-    cleaned = {n.title() for n in cleaned}
+    cleaned = [n.title() for n in cleaned]
     
     # Step 3: Keep only names with at least two words
-    cleaned = {n for n in cleaned if len(n.split()) >= 2}
+    cleaned = [n for n in cleaned if len(n.split()) >= 2]
     
-    # Step 4: Merge similar names
+    # Step 4: Keep only names with at least `min_count` occurrences
+    counts = Counter(cleaned)
+    cleaned = {n for n in cleaned if counts[n] >= min_count}
+    
+    # Step 5: Merge similar names
     merged = set()
     processed = set()
     
@@ -248,8 +282,7 @@ def find_names(text, automaton, threshold=85):
         if fuzz.ratio(strip_accents(orig_name.lower()), strip_accents(matched.lower())) >= threshold
     })
 
-import numpy as np
-from collections import Counter
+
 
 def replace_one_off_designers(df):
     # Make sure all designer_name entries are lists
@@ -296,6 +329,51 @@ def replace_one_off_designers(df):
     df["designer_name"] = filled
     return df
 
+def split_names(full_name):
+    """Split strings like 'A & B', 'A and B', or 'A, B' into individual names."""
+    parts = re.split(r"\s*&\s*|\s+and\s+|,", full_name)
+    return [p.strip() for p in parts if p.strip()]
+
+def deduplicate_and_split(names):
+    """
+    - Split compound names like "Viktor & Rolf" into ["Viktor", "Rolf"]
+    - Remove shorter semi-duplicates when a longer name exists
+    """
+    if not isinstance(names, np.ndarray):
+        return names
+
+    # Step 1: split all compound names
+    all_names = []
+    for n in names:
+        if not n or not isinstance(n, str):
+            continue
+        all_names.extend(split_names(n))
+
+    # Step 2: remove semi-duplicates (keep longest/more complete)
+    final_names = set(all_names)
+    to_remove = set()
+    for name in final_names:
+        for other in final_names:
+            if name == other:
+                continue
+            # Remove shorter name if fully contained in another with extra words
+            if name in other and len(other.split()) > len(name.split()):
+                to_remove.add(name)
+
+    final_names -= to_remove
+    return sorted(final_names)
+
+import spacy
+import pandas as pd
+import os
+
+
+def extract_person_names(text):
+    if not isinstance(text, str):
+        return []
+    doc = nlp(text)
+    persons = [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
+    return list(set(persons))  # unique names only
 
 
 
@@ -303,7 +381,7 @@ if __name__ == "__main__":
     # === Load and filter main DF ===
     df = pd.read_parquet("data/vogue_data.parquet")
     df = df[df.groupby("fashion_house")["fashion_house"].transform("count") >= 10]
-    df = df.drop(columns=[c for c in ["designer_names", "designer_name"] if c in df.columns])
+    df = df.drop(columns=[c for c in ["designer_names", "designer_name", "designer_source"] if c in df.columns])
 
     # === Load designer sources ===
     bio_designers = pd.read_json("data/designer_data_fmd.json", lines=True)
@@ -313,7 +391,18 @@ if __name__ == "__main__":
     designer_bof = pd.read_json("data/all_designer_data_BOF.json", lines=True).designer_name
     additional_designers = pd.read_csv("data/names/additional_designers.csv").designer_name
 
-    df = df.dropna(subset=["description"]) 
+    df = df.dropna(subset=["description"])  # just in case
+
+    # Apply NER extraction to 'description'
+    if os.path.exists("data/names/all_ner_names.csv"):
+        all_ner_names = pd.read_csv("data/names/all_ner_names.csv").designer_name
+    else:
+        nlp = spacy.load("en_core_web_sm")
+        df["ner_person_names"] = df["description"].apply(extract_person_names)
+        all_ner_names = list(name for sublist in df["ner_person_names"] for name in sublist)
+        all_ner_names = clean_and_merge_names(all_ner_names, threshold=90, min_count=20)
+        all_ner_names_df = pd.DataFrame(all_ner_names, columns=["designer_name"])
+        all_ner_names_df.to_csv("data/names/all_ner_names.csv", index = False)
 
     # === Founders from extracted KG ===
     df_extracted_fashion_house = pd.read_json("data/extracted_KG/extracted_KG_fmd_fashion_houses.json", lines=True)
@@ -328,7 +417,8 @@ if __name__ == "__main__":
     founders = clean_and_merge_names(founders, threshold=90)
 
     # === All designer names ===
-    all_designers = set(designers_fmd) | set(designer_bof) | set(additional_designers) | set(founders) 
+    all_designers = set(designers_fmd) | set(designer_bof) | set(additional_designers) | set(founders) #| set(all_ner_names)
+
 
     # === Build founder lookup dict ===
     df_fh_fmd = pd.read_json("data/brand_data_fmd.json", lines=True)
@@ -364,13 +454,15 @@ if __name__ == "__main__":
     #df = fill_empty_designer_names(df)
 
     #remove one off designers as probably spurious 
+    
     df = replace_one_off_designers(df)
+    df["designer_name"] = df["designer_name"].apply(to_list)
+    df["designer_name"] = df["designer_name"].apply(lambda x: [] if x == [None] else x)
 
     df = assign_designer_to_fashion_house(df, "Aquascutum", ["John Emary"])
-    df = assign_designer_to_fashion_house(df, "Area", ["Beckett Fogg and Piotrek Panszczyk"])
+    df = assign_designer_to_fashion_house(df, "Area", ["Beckett Fogg", "Piotrek Panszczyk"])
     df = assign_designer_to_fashion_house(df, "Nehera", ["Samuel Drira"])
     df = assign_designer_to_fashion_house(df, "Matthew Williamson", ["Matthew Williamson"])
-
     df = assign_designer_to_fashion_house(df, "Limi Feu" ,[ "Limi Yamamoto"])
     df = assign_designer_to_fashion_house(df,"Lazoschmidl" ,["Johannes Schmidl"] )
     df = assign_designer_to_fashion_house(df,"Kolor" ,["Junichi Abe"] )
@@ -384,6 +476,47 @@ if __name__ == "__main__":
     df = assign_designer_to_fashion_house(df, "Blumarine", ["Anna Molinari"] )
     df = assign_designer_to_fashion_house(df, "Boglioli", ["Davide Marello"] )
     df = assign_designer_to_fashion_house(df, "Brian Reyes", ["Brian Reyes"] )
+    df = assign_designer_to_fashion_house(df, "Zankov", ["Henry Zankov"] )
+    df = assign_designer_to_fashion_house(df, "Lindsey Thornburg", ["Lindsey Thornburg"] )
+    df = assign_designer_to_fashion_house(df, "Aganovich", ["Nana Aganovich"] )
+    df = assign_designer_to_fashion_house(df, "William Fan", ["William Fan"] )
+    df = assign_designer_to_fashion_house(df, "Courreges", ["Andre Courreges"] )
+    df = assign_designer_to_fashion_house(df, "Maurizio Pecoraro", ["Maurizio Pecoraro"] )
+    df = assign_designer_to_fashion_house(df, "Corneliani", ["Sergio Corneliani"] )
+    df = assign_designer_to_fashion_house(df, "Frederick Anderson", ["Frederick Anderson"] )
+    df = assign_designer_to_fashion_house(df, "Issa", ["Chetana Sagiraju","Swati Yendluri"] )
+    df = assign_designer_to_fashion_house(df, "Josie Natori", ["Josie Natori"] )
+    df = assign_designer_to_fashion_house(df, "Katie Gallagher", ["Katie Gallagher"] )
+    df = assign_designer_to_fashion_house(df, "Talbot Runhof", ["Johnny Talbot","Adrian Runhof"] )
+    df = assign_designer_to_fashion_house(df, "Wendy Nichol", ["Wendy Nichol"] )
+    df = assign_designer_to_fashion_house(df, "Nomia", ["Yara Flinn"] )
+    df = assign_designer_to_fashion_house(df, "Vetements", ["Demna Gvasalia"] )
+    df = assign_designer_to_fashion_house(df, "Viktor & Rolf", ["Viktor Horsting","Rolf Snoereg"] )
+    df = assign_designer_to_fashion_house(df, "Viktor Rolf", ["Viktor Horsting","Rolf Snoereg"] )
+    df = assign_designer_to_fashion_house(df, "Nicholas K", ["Nicholas K"] )
     # Save
-    df.to_parquet("data/vogue_data.parquet")
+
+
+    df["designer_name"] = df["designer_name"].apply(deduplicate_and_split)
+    df= df[df["designer_name"].apply(lambda x: len(x) !=0)]
+    df = df.drop(columns=[col for col in ["designer_names","ner_person_names"] if col in df.columns])
+    df.to_parquet("data/vogue_data_cd.parquet")
+
+    df_exp = df.explode("designer_name")
+
+    # Remove None or empty strings if any
+    df_exp = df_exp[df_exp["designer_name"].notna() & (df_exp["designer_name"] != "")]
+
+    # Count distinct designers per fashion house
+    designer_counts = df_exp.groupby("fashion_house")["designer_name"].nunique()
+
+    # Filter fashion houses with more than one distinct designer
+    fh_multiple_designers = designer_counts[designer_counts > 1].index.tolist()
+
+    # Optionally get df filtered by these fashion houses
+    df_multiple_designers = df[df["fashion_house"].isin(fh_multiple_designers)]
+    periods_dict = fashion_house_designer_periods(df_multiple_designers)
+    with open('data/creative_directors_timelines.json', 'w') as fp:
+        json.dump(periods_dict, fp, indent=2, sort_keys=True)
+
 

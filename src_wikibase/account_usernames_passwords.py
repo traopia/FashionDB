@@ -1,5 +1,5 @@
-WDUSER_wikibase = 'traopia'
-wikibase = "fashiondb"
+WDUSER_wikibase = 'Traopia'
+wikibase = "fashionwiki"
 
 if wikibase == "wikifashion":
     WDPASS_test = 'caFtuv-9hyvfe-ruxved'

@@ -1,0 +1,2010 @@
+{
+  "Agnona": [
+    {
+      "designer": "Simon Holloway",
+      "end_year": 2020,
+      "start_year": 2016
+    },
+    {
+      "designer": "Stefano Pilati",
+      "end_year": 2015,
+      "start_year": 2014
+    }
+  ],
+  "Alexander Mcqueen": [
+    {
+      "designer": "Alexander McQueen",
+      "end_year": 2022,
+      "start_year": 1995
+    },
+    {
+      "designer": "Sarah Burton",
+      "end_year": 2023,
+      "start_year": 2011
+    },
+    {
+      "designer": "Se\u00e1n McGirr",
+      "end_year": 2025,
+      "start_year": 2024
+    }
+  ],
+  "Apiece Apart": [
+    {
+      "designer": "Laura Cramer",
+      "end_year": 2024,
+      "start_year": 2013
+    },
+    {
+      "designer": "Starr Hout",
+      "end_year": 2024,
+      "start_year": 2013
+    }
+  ],
+  "Area": [
+    {
+      "designer": "Beckett Fogg",
+      "end_year": 2024,
+      "start_year": 2016
+    },
+    {
+      "designer": "Piotrek Panszczyk",
+      "end_year": 2024,
+      "start_year": 2016
+    }
+  ],
+  "Au Jour Le Jour": [
+    {
+      "designer": "Diego Marquez",
+      "end_year": 2019,
+      "start_year": 2015
+    },
+    {
+      "designer": "Mirko Fontana",
+      "end_year": 2019,
+      "start_year": 2015
+    }
+  ],
+  "Augustin Teboul": [
+    {
+      "designer": "Annelie Augustin",
+      "end_year": 2017,
+      "start_year": 2013
+    },
+    {
+      "designer": "Od\u00e9ly Teboul",
+      "end_year": 2017,
+      "start_year": 2013
+    }
+  ],
+  "Azzaro": [
+    {
+      "designer": "Loris Azzaro",
+      "end_year": 2021,
+      "start_year": 2013
+    },
+    {
+      "designer": "Olivier Theyskens",
+      "end_year": 2022,
+      "start_year": 2020
+    },
+    {
+      "designer": "Vanessa Seward",
+      "end_year": 2012,
+      "start_year": 2009
+    }
+  ],
+  "Babyghost": [
+    {
+      "designer": "Joshua Hupper",
+      "end_year": 2020,
+      "start_year": 2015
+    },
+    {
+      "designer": "Qiaoran Huang",
+      "end_year": 2020,
+      "start_year": 2015
+    }
+  ],
+  "Bach Mai": [
+    {
+      "designer": "Crist\u00f3bal Balenciaga",
+      "end_year": 2024,
+      "start_year": 2024
+    },
+    {
+      "designer": "Nguyen Bach Mai",
+      "end_year": 2025,
+      "start_year": 2022
+    },
+    {
+      "designer": "Tom Ford",
+      "end_year": 2024,
+      "start_year": 2024
+    }
+  ],
+  "Badgley Mischka": [
+    {
+      "designer": "James Mischka",
+      "end_year": 2025,
+      "start_year": 2000
+    },
+    {
+      "designer": "Mark Badgley",
+      "end_year": 2025,
+      "start_year": 2000
+    }
+  ],
+  "Baja East": [
+    {
+      "designer": "John Targon",
+      "end_year": 2022,
+      "start_year": 2015
+    },
+    {
+      "designer": "Scott Studenberg",
+      "end_year": 2022,
+      "start_year": 2015
+    }
+  ],
+  "Balenciaga": [
+    {
+      "designer": "Alexander Wang",
+      "end_year": 2018,
+      "start_year": 2014
+    },
+    {
+      "designer": "Crist\u00f3bal Balenciaga",
+      "end_year": 2013,
+      "start_year": 2013
+    },
+    {
+      "designer": "Demna",
+      "end_year": 2025,
+      "start_year": 2018
+    },
+    {
+      "designer": "Demna Gvasalia",
+      "end_year": 2021,
+      "start_year": 2018
+    },
+    {
+      "designer": "Nicolas Ghesqui\u00e8re",
+      "end_year": 2013,
+      "start_year": 1998
+    }
+  ],
+  "Balmain": [
+    {
+      "designer": "Christophe Decarnin",
+      "end_year": 2011,
+      "start_year": 2007
+    },
+    {
+      "designer": "Gilles Dufour",
+      "end_year": 2002,
+      "start_year": 2001
+    },
+    {
+      "designer": "Olivier Rousteing",
+      "end_year": 2025,
+      "start_year": 2012
+    },
+    {
+      "designer": "Oscar De La Renta",
+      "end_year": 2000,
+      "start_year": 2000
+    }
+  ],
+  "Banana Republic": [
+    {
+      "designer": "Marissa Webb",
+      "end_year": 2017,
+      "start_year": 2014
+    },
+    {
+      "designer": "Mel and Patricia Ziegler",
+      "end_year": 2012,
+      "start_year": 2010
+    },
+    {
+      "designer": "Narciso Rodriguez",
+      "end_year": 2013,
+      "start_year": 2011
+    }
+  ],
+  "Beautiful People": [
+    {
+      "designer": "Madeleine Vionnet",
+      "end_year": 2020,
+      "start_year": 2016
+    },
+    {
+      "designer": "Miguel Adrover",
+      "end_year": 2019,
+      "start_year": 2013
+    }
+  ],
+  "Belstaff": [
+    {
+      "designer": "Brunello Cucinelli",
+      "end_year": 2015,
+      "start_year": 2007
+    },
+    {
+      "designer": "Delphine Ninous",
+      "end_year": 2019,
+      "start_year": 2014
+    },
+    {
+      "designer": "Sean Lehnhardt-Moore",
+      "end_year": 2020,
+      "start_year": 2020
+    }
+  ],
+  "Berluti": [
+    {
+      "designer": "Alessandro Sartori",
+      "end_year": 2019,
+      "start_year": 2012
+    },
+    {
+      "designer": "Kris Van Assche",
+      "end_year": 2023,
+      "start_year": 2020
+    },
+    {
+      "designer": "Olga Berluti",
+      "end_year": 2025,
+      "start_year": 2024
+    },
+    {
+      "designer": "Talbinio Berluti",
+      "end_year": 2024,
+      "start_year": 2024
+    }
+  ],
+  "Bill Blass": [
+    {
+      "designer": "Bill Blass",
+      "end_year": 2012,
+      "start_year": 2000
+    },
+    {
+      "designer": "Peter Som",
+      "end_year": 2008,
+      "start_year": 2006
+    }
+  ],
+  "Blaak": [
+    {
+      "designer": "Katharine Hamnett",
+      "end_year": 2003,
+      "start_year": 2001
+    },
+    {
+      "designer": "Robert Clergerie",
+      "end_year": 2004,
+      "start_year": 2002
+    }
+  ],
+  "Bottega Veneta": [
+    {
+      "designer": "Daniel Lee",
+      "end_year": 2022,
+      "start_year": 2020
+    },
+    {
+      "designer": "Giles Deacon",
+      "end_year": 2001,
+      "start_year": 2000
+    },
+    {
+      "designer": "Matthieu Blazy",
+      "end_year": 2025,
+      "start_year": 2023
+    },
+    {
+      "designer": "Tomas Maier",
+      "end_year": 2019,
+      "start_year": 2004
+    },
+    {
+      "designer": "Vittorio and Laura Moltedo",
+      "end_year": 2001,
+      "start_year": 2001
+    }
+  ],
+  "Botter": [
+    {
+      "designer": "Lisi Herrebrugh",
+      "end_year": 2024,
+      "start_year": 2019
+    },
+    {
+      "designer": "Rushemy Botter",
+      "end_year": 2024,
+      "start_year": 2019
+    }
+  ],
+  "Brioni": [
+    {
+      "designer": "Alessandro Dell'Acqua",
+      "end_year": 2006,
+      "start_year": 2006
+    },
+    {
+      "designer": "Brendan Mullane",
+      "end_year": 2018,
+      "start_year": 2011
+    },
+    {
+      "designer": "Norbert Stumpfl ",
+      "end_year": 2025,
+      "start_year": 2019
+    }
+  ],
+  "Cacharel": [
+    {
+      "designer": "Isabel Marant",
+      "end_year": 2015,
+      "start_year": 2010
+    },
+    {
+      "designer": "Jean Bousquet",
+      "end_year": 2019,
+      "start_year": 2001
+    },
+    {
+      "designer": "Stephen Jones",
+      "end_year": 2018,
+      "start_year": 2016
+    }
+  ],
+  "Calvin Klein Collection": [
+    {
+      "designer": "Calvin Klein",
+      "end_year": 2015,
+      "start_year": 1994
+    },
+    {
+      "designer": "Francisco Costa",
+      "end_year": 2017,
+      "start_year": 2004
+    }
+  ],
+  "Canali": [
+    {
+      "designer": "Andrea Pompilio",
+      "end_year": 2017,
+      "start_year": 2010
+    },
+    {
+      "designer": "Hyun-Wook Lee",
+      "end_year": 2020,
+      "start_year": 2018
+    },
+    {
+      "designer": "Stefano Canali",
+      "end_year": 2025,
+      "start_year": 2019
+    }
+  ],
+  "Carven": [
+    {
+      "designer": "Carven Tommasso",
+      "end_year": 2025,
+      "start_year": 2011
+    },
+    {
+      "designer": "Guillaume Henry",
+      "end_year": 2017,
+      "start_year": 2012
+    },
+    {
+      "designer": "Louise Trotter",
+      "end_year": 2024,
+      "start_year": 2024
+    }
+  ],
+  "Celine": [
+    {
+      "designer": "Hedi Slimane",
+      "end_year": 2023,
+      "start_year": 2020
+    },
+    {
+      "designer": "Michael Kors",
+      "end_year": 2007,
+      "start_year": 2000
+    },
+    {
+      "designer": "Phoebe Philo",
+      "end_year": 2019,
+      "start_year": 2008
+    }
+  ],
+  "Cerruti": [
+    {
+      "designer": "Peter Speliopoulos",
+      "end_year": 2002,
+      "start_year": 1997
+    },
+    {
+      "designer": "Richard Nicoll",
+      "end_year": 2011,
+      "start_year": 2008
+    }
+  ],
+  "Chanel": [
+    {
+      "designer": "Karl Lagerfeld",
+      "end_year": 2024,
+      "start_year": 1991
+    },
+    {
+      "designer": "Virginie Viard",
+      "end_year": 2025,
+      "start_year": 2020
+    }
+  ],
+  "Chloe": [
+    {
+      "designer": "Clare Waight Keller",
+      "end_year": 2017,
+      "start_year": 2012
+    },
+    {
+      "designer": "Gabriela Hearst",
+      "end_year": 2025,
+      "start_year": 2022
+    },
+    {
+      "designer": "Hannah Macgibbon",
+      "end_year": 2011,
+      "start_year": 2008
+    },
+    {
+      "designer": "Natacha Ramsay-Levi",
+      "end_year": 2021,
+      "start_year": 2018
+    },
+    {
+      "designer": "Phoebe Philo",
+      "end_year": 2009,
+      "start_year": 2002
+    },
+    {
+      "designer": "Stella McCartney",
+      "end_year": 2001,
+      "start_year": 1999
+    }
+  ],
+  "Christian Cowan": [
+    {
+      "designer": "Brandon Maxwell",
+      "end_year": 2025,
+      "start_year": 2023
+    },
+    {
+      "designer": "Christian Cowan",
+      "end_year": 2024,
+      "start_year": 2018
+    },
+    {
+      "designer": "Eugenia Kim",
+      "end_year": 2021,
+      "start_year": 2019
+    }
+  ],
+  "Christian Dior": [
+    {
+      "designer": "John Galliano",
+      "end_year": 2012,
+      "start_year": 1999
+    },
+    {
+      "designer": "Maria Grazia Chiuri",
+      "end_year": 2025,
+      "start_year": 2017
+    },
+    {
+      "designer": "Raf Simons",
+      "end_year": 2016,
+      "start_year": 2013
+    }
+  ],
+  "Clements Ribeiro": [
+    {
+      "designer": "Elsa Schiaparelli",
+      "end_year": 2006,
+      "start_year": 2002
+    },
+    {
+      "designer": "Inacio Ribeiro",
+      "end_year": 2013,
+      "start_year": 2000
+    },
+    {
+      "designer": "Suzanne Clements",
+      "end_year": 2013,
+      "start_year": 2000
+    }
+  ],
+  "Colovos": [
+    {
+      "designer": "Helmut Lang",
+      "end_year": 2019,
+      "start_year": 2016
+    },
+    {
+      "designer": "Martin Margiela",
+      "end_year": 2020,
+      "start_year": 2020
+    }
+  ],
+  "Colville": [
+    {
+      "designer": "Consuelo Castiglioni",
+      "end_year": 2022,
+      "start_year": 2019
+    },
+    {
+      "designer": "Molly Goddard",
+      "end_year": 2024,
+      "start_year": 2023
+    }
+  ],
+  "Commission": [
+    {
+      "designer": "Chris Stamp",
+      "end_year": 2025,
+      "start_year": 2021
+    },
+    {
+      "designer": "Rei Kawakubo",
+      "end_year": 2024,
+      "start_year": 2022
+    }
+  ],
+  "Coperni": [
+    {
+      "designer": "Arnaud Vaillant",
+      "end_year": 2025,
+      "start_year": 2015
+    },
+    {
+      "designer": "Sebastien Meyer",
+      "end_year": 2025,
+      "start_year": 2015
+    }
+  ],
+  "Costello Tagliapietra": [
+    {
+      "designer": "Jeffrey Costello",
+      "end_year": 2013,
+      "start_year": 2008
+    },
+    {
+      "designer": "Jeffrey Costello and Robert Tagliapietra",
+      "end_year": 2015,
+      "start_year": 2005
+    },
+    {
+      "designer": "Robert Tagliapietra",
+      "end_year": 2014,
+      "start_year": 2008
+    }
+  ],
+  "Death To Tennis": [
+    {
+      "designer": "Vincent Oshin",
+      "end_year": 2019,
+      "start_year": 2017
+    },
+    {
+      "designer": "William Watson",
+      "end_year": 2022,
+      "start_year": 2017
+    }
+  ],
+  "Deveaux": [
+    {
+      "designer": "Eileen Fisher",
+      "end_year": 2022,
+      "start_year": 2018
+    },
+    {
+      "designer": "Matthew Breen",
+      "end_year": 2023,
+      "start_year": 2019
+    }
+  ],
+  "Diesel Black Gold": [
+    {
+      "designer": "Hedi Slimane",
+      "end_year": 2017,
+      "start_year": 2015
+    },
+    {
+      "designer": "Nicola Formichetti",
+      "end_year": 2016,
+      "start_year": 2014
+    },
+    {
+      "designer": "Renzo Rosso",
+      "end_year": 2018,
+      "start_year": 2012
+    },
+    {
+      "designer": "Sophia Kokosalaki",
+      "end_year": 2015,
+      "start_year": 2009
+    }
+  ],
+  "Dolce & Gabbana": [
+    {
+      "designer": "Domenico Dolce",
+      "end_year": 2025,
+      "start_year": 2023
+    },
+    {
+      "designer": "Domenico Dolce and Stefano Gabbana",
+      "end_year": 2024,
+      "start_year": 1999
+    }
+  ],
+  "Dolce Gabbana": [
+    {
+      "designer": "Domenico Dolce",
+      "end_year": 2023,
+      "start_year": 1992
+    },
+    {
+      "designer": "Stefano Gabbana",
+      "end_year": 2023,
+      "start_year": 1992
+    },
+    {
+      "designer": "Tom Ford",
+      "end_year": 2006,
+      "start_year": 2004
+    }
+  ],
+  "Dunhill": [
+    {
+      "designer": "Alfred Dunhill",
+      "end_year": 2025,
+      "start_year": 2010
+    },
+    {
+      "designer": "Kim Jones",
+      "end_year": 2021,
+      "start_year": 2011
+    },
+    {
+      "designer": "Paul Smith",
+      "end_year": 2020,
+      "start_year": 2016
+    }
+  ],
+  "Eckhaus Latta": [
+    {
+      "designer": "Mike Eckhaus",
+      "end_year": 2025,
+      "start_year": 2016
+    },
+    {
+      "designer": "Zoe Latta",
+      "end_year": 2024,
+      "start_year": 2016
+    }
+  ],
+  "Edun": [
+    {
+      "designer": "Ali Hewson",
+      "end_year": 2018,
+      "start_year": 2016
+    },
+    {
+      "designer": "Manolo Blahnik",
+      "end_year": 2017,
+      "start_year": 2015
+    },
+    {
+      "designer": "Sharon Wauchob",
+      "end_year": 2015,
+      "start_year": 2011
+    }
+  ],
+  "Electric Feathers": [
+    {
+      "designer": "Lauren Cipoletti",
+      "end_year": 2017,
+      "start_year": 2013
+    },
+    {
+      "designer": "Yohji Yamamoto",
+      "end_year": 2016,
+      "start_year": 2014
+    }
+  ],
+  "Emanuel Ungaro": [
+    {
+      "designer": "Emanuel Ungaro",
+      "end_year": 2020,
+      "start_year": 2000
+    },
+    {
+      "designer": "Esteban Cortazar",
+      "end_year": 2012,
+      "start_year": 2007
+    },
+    {
+      "designer": "Fausto Puglisi",
+      "end_year": 2019,
+      "start_year": 2015
+    }
+  ],
+  "Ermanno Scervino": [
+    {
+      "designer": "Ermanno Daelli",
+      "end_year": 2025,
+      "start_year": 2018
+    },
+    {
+      "designer": "Ermanno Daelli & Toni Scervino",
+      "end_year": 2024,
+      "start_year": 2015
+    }
+  ],
+  "Escada": [
+    {
+      "designer": "Christopher Bailey",
+      "end_year": 2019,
+      "start_year": 2019
+    },
+    {
+      "designer": "Margaretha Ley",
+      "end_year": 2020,
+      "start_year": 2014
+    },
+    {
+      "designer": "Tamara Mellon",
+      "end_year": 2017,
+      "start_year": 2013
+    },
+    {
+      "designer": "Wolfgang Ley",
+      "end_year": 2019,
+      "start_year": 2019
+    }
+  ],
+  "Et Ochs": [
+    {
+      "designer": "Donna Karan",
+      "end_year": 2024,
+      "start_year": 2022
+    },
+    {
+      "designer": "Heron Preston",
+      "end_year": 2023,
+      "start_year": 2023
+    }
+  ],
+  "Etro": [
+    {
+      "designer": "Marco De Vincenzo",
+      "end_year": 2025,
+      "start_year": 2023
+    },
+    {
+      "designer": "Veronica Etro",
+      "end_year": 2022,
+      "start_year": 2005
+    }
+  ],
+  "Faith Connexion": [
+    {
+      "designer": "Christophe Decarnin",
+      "end_year": 2016,
+      "start_year": 2016
+    },
+    {
+      "designer": "Giuseppe Zanotti",
+      "end_year": 2020,
+      "start_year": 2018
+    }
+  ],
+  "Fashion East": [
+    {
+      "designer": "Ashley Williams",
+      "end_year": 2017,
+      "start_year": 2011
+    },
+    {
+      "designer": "The Old Truman Brewery",
+      "end_year": 2025,
+      "start_year": 2006
+    },
+    {
+      "designer": "Yuhan Wang",
+      "end_year": 2022,
+      "start_year": 2018
+    }
+  ],
+  "Fay": [
+    {
+      "designer": "Arthur Arbesser",
+      "end_year": 2019,
+      "start_year": 2017
+    },
+    {
+      "designer": "Diego Della Valle",
+      "end_year": 2018,
+      "start_year": 2014
+    }
+  ],
+  "Fendi": [
+    {
+      "designer": "Delfina Delettrez",
+      "end_year": 2023,
+      "start_year": 2022
+    },
+    {
+      "designer": "Karl Lagerfeld",
+      "end_year": 2021,
+      "start_year": 1999
+    },
+    {
+      "designer": "Kim Jones",
+      "end_year": 2025,
+      "start_year": 2023
+    },
+    {
+      "designer": "Kunihiko Morinaga",
+      "end_year": 2020,
+      "start_year": 2020
+    },
+    {
+      "designer": "Michael Kors",
+      "end_year": 2020,
+      "start_year": 2020
+    },
+    {
+      "designer": "Silvia Venturini Fendi",
+      "end_year": 2024,
+      "start_year": 2008
+    }
+  ],
+  "Ferrari": [
+    {
+      "designer": "Giorgio Armani",
+      "end_year": 2024,
+      "start_year": 2022
+    },
+    {
+      "designer": "Kansai Yamamoto",
+      "end_year": 2025,
+      "start_year": 2023
+    }
+  ],
+  "Givenchy": [
+    {
+      "designer": "Alexander McQueen",
+      "end_year": 2001,
+      "start_year": 1995
+    },
+    {
+      "designer": "Clare Waight Keller",
+      "end_year": 2021,
+      "start_year": 2018
+    },
+    {
+      "designer": "Hubert De Givenchy",
+      "end_year": 2024,
+      "start_year": 2006
+    },
+    {
+      "designer": "Julien Macdonald",
+      "end_year": 2004,
+      "start_year": 2002
+    },
+    {
+      "designer": "Ozwald Boateng",
+      "end_year": 2008,
+      "start_year": 2005
+    },
+    {
+      "designer": "Riccardo Tisci",
+      "end_year": 2023,
+      "start_year": 2006
+    },
+    {
+      "designer": "Yves Saint Laurent",
+      "end_year": 2025,
+      "start_year": 2023
+    }
+  ],
+  "Greta Constantine": [
+    {
+      "designer": "Kirk Pickersgill",
+      "end_year": 2025,
+      "start_year": 2022
+    },
+    {
+      "designer": "Kirk Pickersgill & Stephen Wong",
+      "end_year": 2021,
+      "start_year": 2019
+    }
+  ],
+  "Gucci": [
+    {
+      "designer": "Alessandro Michele",
+      "end_year": 2023,
+      "start_year": 2016
+    },
+    {
+      "designer": "Frida Giannini",
+      "end_year": 2020,
+      "start_year": 2007
+    },
+    {
+      "designer": "Sabato de Sarno",
+      "end_year": 2025,
+      "start_year": 2024
+    },
+    {
+      "designer": "Tom Ford",
+      "end_year": 2006,
+      "start_year": 1995
+    }
+  ],
+  "Halston Heritage": [
+    {
+      "designer": "Max Azria",
+      "end_year": 2015,
+      "start_year": 2015
+    },
+    {
+      "designer": "Roy Halston Frowick",
+      "end_year": 2018,
+      "start_year": 2015
+    }
+  ],
+  "Hermes": [
+    {
+      "designer": "Christophe Lemaire",
+      "end_year": 2014,
+      "start_year": 2013
+    },
+    {
+      "designer": "Jean Paul Gaultier",
+      "end_year": 2012,
+      "start_year": 2004
+    },
+    {
+      "designer": "Martin Margiela",
+      "end_year": 2018,
+      "start_year": 1998
+    },
+    {
+      "designer": "Pierre Hardy",
+      "end_year": 2020,
+      "start_year": 2018
+    },
+    {
+      "designer": "Thierry Hermes",
+      "end_year": 2025,
+      "start_year": 2019
+    }
+  ],
+  "Hillier Bartley": [
+    {
+      "designer": "Katie Hillier",
+      "end_year": 2022,
+      "start_year": 2016
+    },
+    {
+      "designer": "Luella Bartley",
+      "end_year": 2022,
+      "start_year": 2016
+    }
+  ],
+  "Hodakova": [
+    {
+      "designer": "Elsa Schiaparelli",
+      "end_year": 2025,
+      "start_year": 2023
+    },
+    {
+      "designer": "Franco Moschino",
+      "end_year": 2024,
+      "start_year": 2022
+    }
+  ],
+  "Hope": [
+    {
+      "designer": "Ann Ringstrand",
+      "end_year": 2021,
+      "start_year": 2017
+    },
+    {
+      "designer": "Mary Mcfadden",
+      "end_year": 2022,
+      "start_year": 2018
+    },
+    {
+      "designer": "Stefan S\u00f6derberg",
+      "end_year": 2021,
+      "start_year": 2017
+    }
+  ],
+  "Hyke": [
+    {
+      "designer": "Hideaki Yoshihara",
+      "end_year": 2025,
+      "start_year": 2017
+    },
+    {
+      "designer": "Yukiko Ode",
+      "end_year": 2025,
+      "start_year": 2017
+    }
+  ],
+  "Iceberg": [
+    {
+      "designer": "Alexis Martial",
+      "end_year": 2015,
+      "start_year": 2014
+    },
+    {
+      "designer": "Arthur Arbesser",
+      "end_year": 2019,
+      "start_year": 2016
+    },
+    {
+      "designer": "Paolo Gerani",
+      "end_year": 2013,
+      "start_year": 2007
+    },
+    {
+      "designer": "Silvio and Giuliana Gerani",
+      "end_year": 2021,
+      "start_year": 2000
+    }
+  ],
+  "Interior": [
+    {
+      "designer": "Jack Miner",
+      "end_year": 2024,
+      "start_year": 2022
+    },
+    {
+      "designer": "Lily Miesmer",
+      "end_year": 2024,
+      "start_year": 2022
+    }
+  ],
+  "Issa": [
+    {
+      "designer": "Chetana Sagiraju",
+      "end_year": 2016,
+      "start_year": 2009
+    },
+    {
+      "designer": "Swati Yendluri",
+      "end_year": 2016,
+      "start_year": 2009
+    }
+  ],
+  "J Brand": [
+    {
+      "designer": "Jeff Rudes & Susie Crippen",
+      "end_year": 2020,
+      "start_year": 2013
+    },
+    {
+      "designer": "Kozaburo Akasaka",
+      "end_year": 2019,
+      "start_year": 2017
+    },
+    {
+      "designer": "Tom Ford",
+      "end_year": 2018,
+      "start_year": 2014
+    }
+  ],
+  "Jil Sander": [
+    {
+      "designer": "Jil Sander",
+      "end_year": 2025,
+      "start_year": 2000
+    },
+    {
+      "designer": "Raf Simons",
+      "end_year": 2012,
+      "start_year": 2010
+    }
+  ],
+  "Joie": [
+    {
+      "designer": "Ralph Lauren",
+      "end_year": 2020,
+      "start_year": 2018
+    },
+    {
+      "designer": "Serge Azria",
+      "end_year": 2016,
+      "start_year": 2013
+    },
+    {
+      "designer": "Yves Saint Laurent",
+      "end_year": 2019,
+      "start_year": 2017
+    }
+  ],
+  "Juicy Couture": [
+    {
+      "designer": "Jeremy Scott",
+      "end_year": 2018,
+      "start_year": 2014
+    },
+    {
+      "designer": "Pamela Skaist-Levy & Gela Nash-Taylor",
+      "end_year": 2015,
+      "start_year": 2012
+    }
+  ],
+  "Kate Spade New York": [
+    {
+      "designer": "Kate Brosnahan",
+      "end_year": 2024,
+      "start_year": 2013
+    },
+    {
+      "designer": "Michael Kors",
+      "end_year": 2020,
+      "start_year": 2016
+    }
+  ],
+  "Kaufmanfranco": [
+    {
+      "designer": "Isaac Franco",
+      "end_year": 2016,
+      "start_year": 2013
+    },
+    {
+      "designer": "Ken Kaufman",
+      "end_year": 2016,
+      "start_year": 2013
+    }
+  ],
+  "Kenzo": [
+    {
+      "designer": "Antonio Marras",
+      "end_year": 2012,
+      "start_year": 2005
+    },
+    {
+      "designer": "Delfina Delettrez",
+      "end_year": 2013,
+      "start_year": 2012
+    },
+    {
+      "designer": "Felipe Oliveira Baptista",
+      "end_year": 2023,
+      "start_year": 2021
+    },
+    {
+      "designer": "Kenzo Takada",
+      "end_year": 2025,
+      "start_year": 2000
+    },
+    {
+      "designer": "Paul Smith",
+      "end_year": 2019,
+      "start_year": 2017
+    },
+    {
+      "designer": "Pharrell Williams",
+      "end_year": 2024,
+      "start_year": 2022
+    }
+  ],
+  "Kwaidan Editions": [
+    {
+      "designer": "Hung La",
+      "end_year": 2022,
+      "start_year": 2018
+    },
+    {
+      "designer": "L\u00e9a Dickely",
+      "end_year": 2022,
+      "start_year": 2018
+    }
+  ],
+  "La Perla": [
+    {
+      "designer": "Ada Masotti",
+      "end_year": 2018,
+      "start_year": 2017
+    },
+    {
+      "designer": "Alessandro Dell'Acqua",
+      "end_year": 2009,
+      "start_year": 2007
+    }
+  ],
+  "Lacoste": [
+    {
+      "designer": "Christophe Lemaire",
+      "end_year": 2011,
+      "start_year": 2006
+    },
+    {
+      "designer": "Felipe Oliveira Baptista",
+      "end_year": 2019,
+      "start_year": 2012
+    },
+    {
+      "designer": "Louise Trotter",
+      "end_year": 2025,
+      "start_year": 2019
+    }
+  ],
+  "Lanvin": [
+    {
+      "designer": "Alber Elbaz",
+      "end_year": 2016,
+      "start_year": 2001
+    },
+    {
+      "designer": "Bouchra Jarrar",
+      "end_year": 2020,
+      "start_year": 2017
+    },
+    {
+      "designer": "Jeanne Lanvin",
+      "end_year": 2025,
+      "start_year": 2000
+    }
+  ],
+  "Les Copains": [
+    {
+      "designer": "Mario Bandiera",
+      "end_year": 2019,
+      "start_year": 2015
+    },
+    {
+      "designer": "Ming Ma",
+      "end_year": 2018,
+      "start_year": 2014
+    }
+  ],
+  "Libertine": [
+    {
+      "designer": "Cindy Greene",
+      "end_year": 2024,
+      "start_year": 2004
+    },
+    {
+      "designer": "Johnson Hartig",
+      "end_year": 2025,
+      "start_year": 2004
+    }
+  ],
+  "Loewe": [
+    {
+      "designer": "Jonathan Anderson",
+      "end_year": 2025,
+      "start_year": 2015
+    },
+    {
+      "designer": "Narciso Rodriguez",
+      "end_year": 2002,
+      "start_year": 2000
+    },
+    {
+      "designer": "Stuart Vevers",
+      "end_year": 2013,
+      "start_year": 2007
+    }
+  ],
+  "Longchamp": [
+    {
+      "designer": "Hedi Slimane",
+      "end_year": 2020,
+      "start_year": 2018
+    },
+    {
+      "designer": "Jean Cassegrain",
+      "end_year": 2019,
+      "start_year": 2015
+    }
+  ],
+  "Louis Vuitton": [
+    {
+      "designer": "Kim Jones",
+      "end_year": 2020,
+      "start_year": 2016
+    },
+    {
+      "designer": "Louis Vuitton",
+      "end_year": 2025,
+      "start_year": 1998
+    },
+    {
+      "designer": "Marc Jacobs",
+      "end_year": 2008,
+      "start_year": 2004
+    }
+  ],
+  "Luca Luca": [
+    {
+      "designer": "Luca Orlandi",
+      "end_year": 2008,
+      "start_year": 2000
+    },
+    {
+      "designer": "Raul Melgoza",
+      "end_year": 2012,
+      "start_year": 2009
+    }
+  ],
+  "M Missoni": [
+    {
+      "designer": "Angela Missoni",
+      "end_year": 2019,
+      "start_year": 2014
+    },
+    {
+      "designer": "Marc Jacobs",
+      "end_year": 2020,
+      "start_year": 2018
+    }
+  ],
+  "Magliano": [
+    {
+      "designer": "Francesco Risso",
+      "end_year": 2025,
+      "start_year": 2023
+    },
+    {
+      "designer": "Giorgio Armani",
+      "end_year": 2024,
+      "start_year": 2022
+    }
+  ],
+  "Maiyet": [
+    {
+      "designer": "Declan Kearney",
+      "end_year": 2017,
+      "start_year": 2016
+    },
+    {
+      "designer": "Kristy Caylor",
+      "end_year": 2015,
+      "start_year": 2012
+    }
+  ],
+  "Maki Oh": [
+    {
+      "designer": "Amaka Osakwe",
+      "end_year": 2020,
+      "start_year": 2015
+    },
+    {
+      "designer": "Maki Osakwe",
+      "end_year": 2014,
+      "start_year": 2013
+    }
+  ],
+  "Mame Kurogouchi": [
+    {
+      "designer": "Maiko Kurogouchi",
+      "end_year": 2025,
+      "start_year": 2018
+    },
+    {
+      "designer": "Mame Kurogouchi",
+      "end_year": 2023,
+      "start_year": 2020
+    }
+  ],
+  "Mansur Gavriel": [
+    {
+      "designer": "Floriana Gavriel",
+      "end_year": 2019,
+      "start_year": 2017
+    },
+    {
+      "designer": "Rachel Mansur",
+      "end_year": 2019,
+      "start_year": 2017
+    }
+  ],
+  "Marchesa": [
+    {
+      "designer": "Georgina Chapman",
+      "end_year": 2025,
+      "start_year": 2007
+    },
+    {
+      "designer": "Keren Craig",
+      "end_year": 2018,
+      "start_year": 2010
+    }
+  ],
+  "Marchesa Notte": [
+    {
+      "designer": "Georgina Chapman",
+      "end_year": 2020,
+      "start_year": 2015
+    },
+    {
+      "designer": "Keren Craig",
+      "end_year": 2019,
+      "start_year": 2015
+    }
+  ],
+  "Marni": [
+    {
+      "designer": "Consuelo Castiglioni",
+      "end_year": 2017,
+      "start_year": 1999
+    },
+    {
+      "designer": "Francesco Risso",
+      "end_year": 2025,
+      "start_year": 2017
+    }
+  ],
+  "Max Mara": [
+    {
+      "designer": "Achille Maramotti",
+      "end_year": 2015,
+      "start_year": 2000
+    },
+    {
+      "designer": "Ian Griffiths",
+      "end_year": 2025,
+      "start_year": 2011
+    },
+    {
+      "designer": "Loris Azzaro",
+      "end_year": 2004,
+      "start_year": 2004
+    },
+    {
+      "designer": "Narciso Rodriguez",
+      "end_year": 2006,
+      "start_year": 2006
+    },
+    {
+      "designer": "Zandra Rhodes",
+      "end_year": 2005,
+      "start_year": 2004
+    }
+  ],
+  "Meadham Kirchhoff": [
+    {
+      "designer": "Benjamin Kirchhoff",
+      "end_year": 2012,
+      "start_year": 2008
+    },
+    {
+      "designer": "Benjamin Kirchhoff and Edward Meadham",
+      "end_year": 2014,
+      "start_year": 2014
+    },
+    {
+      "designer": "Roger Vivier",
+      "end_year": 2015,
+      "start_year": 2013
+    }
+  ],
+  "Missoni": [
+    {
+      "designer": "Angela Missoni",
+      "end_year": 2025,
+      "start_year": 2000
+    },
+    {
+      "designer": "Riccardo Tisci",
+      "end_year": 2023,
+      "start_year": 2023
+    }
+  ],
+  "Monse": [
+    {
+      "designer": "Fernando Garcia",
+      "end_year": 2025,
+      "start_year": 2016
+    },
+    {
+      "designer": "Laura Kim",
+      "end_year": 2025,
+      "start_year": 2016
+    }
+  ],
+  "Moschino": [
+    {
+      "designer": "Elsa Schiaparelli",
+      "end_year": 2004,
+      "start_year": 2004
+    },
+    {
+      "designer": "Franco Moschino",
+      "end_year": 2025,
+      "start_year": 1991
+    },
+    {
+      "designer": "Jeremy Scott",
+      "end_year": 2024,
+      "start_year": 2015
+    },
+    {
+      "designer": "Miuccia Prada",
+      "end_year": 2004,
+      "start_year": 2004
+    },
+    {
+      "designer": "Rossella Jardini",
+      "end_year": 2014,
+      "start_year": 2000
+    }
+  ],
+  "Mugler": [
+    {
+      "designer": "Casey Cadwallader",
+      "end_year": 2025,
+      "start_year": 2020
+    },
+    {
+      "designer": "David Koma",
+      "end_year": 2019,
+      "start_year": 2015
+    },
+    {
+      "designer": "Nicola Formichetti",
+      "end_year": 2013,
+      "start_year": 2011
+    },
+    {
+      "designer": "Thierry Mugler",
+      "end_year": 1998,
+      "start_year": 1992
+    }
+  ],
+  "Mulberry": [
+    {
+      "designer": "Emma Hill",
+      "end_year": 2018,
+      "start_year": 2009
+    },
+    {
+      "designer": "Roger Saul & Joan Saul",
+      "end_year": 2020,
+      "start_year": 2019
+    }
+  ],
+  "Nells Nelson": [
+    {
+      "designer": "Giorgio Armani",
+      "end_year": 2024,
+      "start_year": 2022
+    },
+    {
+      "designer": "Phoebe Philo",
+      "end_year": 2023,
+      "start_year": 2019
+    }
+  ],
+  "Nina Ricci": [
+    {
+      "designer": "Guillaume Henry",
+      "end_year": 2020,
+      "start_year": 2016
+    },
+    {
+      "designer": "Harris Reed",
+      "end_year": 2025,
+      "start_year": 2021
+    },
+    {
+      "designer": "Lars Nilsson ",
+      "end_year": 2007,
+      "start_year": 2004
+    },
+    {
+      "designer": "Maria Nielli",
+      "end_year": 2019,
+      "start_year": 2017
+    },
+    {
+      "designer": "Olivier Theyskens",
+      "end_year": 2010,
+      "start_year": 2008
+    },
+    {
+      "designer": "Peter Copping",
+      "end_year": 2015,
+      "start_year": 2011
+    },
+    {
+      "designer": "Yves Saint Laurent",
+      "end_year": 2022,
+      "start_year": 2022
+    }
+  ],
+  "Oscar De La Renta": [
+    {
+      "designer": "Oscar De La Renta",
+      "end_year": 2018,
+      "start_year": 2000
+    },
+    {
+      "designer": "Oscar de la Renta",
+      "end_year": 2023,
+      "start_year": 2019
+    }
+  ],
+  "Pamella Roland": [
+    {
+      "designer": "David Rodriguez",
+      "end_year": 2017,
+      "start_year": 2013
+    },
+    {
+      "designer": "Pamella DeVos",
+      "end_year": 2021,
+      "start_year": 2018
+    }
+  ],
+  "Patou": [
+    {
+      "designer": "Guillaume Henry",
+      "end_year": 2023,
+      "start_year": 2020
+    },
+    {
+      "designer": "Jean Patou",
+      "end_year": 2025,
+      "start_year": 2024
+    }
+  ],
+  "Paul Joe": [
+    {
+      "designer": "Sophie Albou",
+      "end_year": 2015,
+      "start_year": 2011
+    },
+    {
+      "designer": "Sophie Mechaly",
+      "end_year": 2019,
+      "start_year": 2015
+    }
+  ],
+  "Plan C": [
+    {
+      "designer": "Chiara Capitani and Carolina Crespi",
+      "end_year": 2025,
+      "start_year": 2019
+    },
+    {
+      "designer": "Consuelo Castiglioni",
+      "end_year": 2024,
+      "start_year": 2022
+    }
+  ],
+  "Prada": [
+    {
+      "designer": "Miuccia Prada",
+      "end_year": 2022,
+      "start_year": 1992
+    },
+    {
+      "designer": "Raf Simons",
+      "end_year": 2025,
+      "start_year": 2023
+    }
+  ],
+  "Rag Bone": [
+    {
+      "designer": "David Neville",
+      "end_year": 2015,
+      "start_year": 2007
+    },
+    {
+      "designer": "Marcus Wainwright",
+      "end_year": 2025,
+      "start_year": 2007
+    }
+  ],
+  "Rave Review": [
+    {
+      "designer": "Josephine Bergqvist",
+      "end_year": 2023,
+      "start_year": 2023
+    },
+    {
+      "designer": "Livia Sch\u00fcck",
+      "end_year": 2023,
+      "start_year": 2023
+    }
+  ],
+  "Ruffian": [
+    {
+      "designer": "Brian Wolk",
+      "end_year": 2015,
+      "start_year": 2014
+    },
+    {
+      "designer": "Claude Morais",
+      "end_year": 2015,
+      "start_year": 2014
+    }
+  ],
+  "Saint Laurent": [
+    {
+      "designer": "Anthony Vaccarello",
+      "end_year": 2025,
+      "start_year": 2019
+    },
+    {
+      "designer": "Hedi Slimane",
+      "end_year": 2018,
+      "start_year": 2013
+    },
+    {
+      "designer": "Stefano Pilati",
+      "end_year": 2012,
+      "start_year": 2006
+    },
+    {
+      "designer": "Tom Ford",
+      "end_year": 2005,
+      "start_year": 2001
+    },
+    {
+      "designer": "Yves Saint Laurent",
+      "end_year": 2010,
+      "start_year": 2000
+    }
+  ],
+  "Sportmax": [
+    {
+      "designer": "Achille Maramotti",
+      "end_year": 2025,
+      "start_year": 2000
+    },
+    {
+      "designer": "Jil Sander",
+      "end_year": 2017,
+      "start_year": 2013
+    },
+    {
+      "designer": "Koos Van Den Akker",
+      "end_year": 2018,
+      "start_year": 2014
+    }
+  ],
+  "Takahiromiyashita The Soloist": [
+    {
+      "designer": "Judy Blame",
+      "end_year": 2024,
+      "start_year": 2024
+    },
+    {
+      "designer": "Jun Takahashi",
+      "end_year": 2020,
+      "start_year": 2018
+    },
+    {
+      "designer": "Pharrell Williams",
+      "end_year": 2017,
+      "start_year": 2016
+    },
+    {
+      "designer": "Tom Ford",
+      "end_year": 2023,
+      "start_year": 2018
+    },
+    {
+      "designer": "Yohji Yamamoto",
+      "end_year": 2025,
+      "start_year": 2022
+    }
+  ],
+  "Talbot Runhof": [
+    {
+      "designer": "Adrian Runhof",
+      "end_year": 2019,
+      "start_year": 2010
+    },
+    {
+      "designer": "Johnny Talbot",
+      "end_year": 2019,
+      "start_year": 2010
+    }
+  ],
+  "Theory": [
+    {
+      "designer": "Giorgio Armani",
+      "end_year": 2021,
+      "start_year": 2019
+    },
+    {
+      "designer": "Lucas Ossendrijver",
+      "end_year": 2024,
+      "start_year": 2020
+    },
+    {
+      "designer": "Olivier Theyskens",
+      "end_year": 2017,
+      "start_year": 2014
+    },
+    {
+      "designer": "Tom Ford",
+      "end_year": 2018,
+      "start_year": 2016
+    }
+  ],
+  "Trussardi": [
+    {
+      "designer": "Dante Trussardi",
+      "end_year": 2023,
+      "start_year": 2000
+    },
+    {
+      "designer": "Umit Benan",
+      "end_year": 2016,
+      "start_year": 2010
+    }
+  ],
+  "Twenty8Twelve": [
+    {
+      "designer": "Paul Smith",
+      "end_year": 2010,
+      "start_year": 2010
+    },
+    {
+      "designer": "Sienna Miller",
+      "end_year": 2013,
+      "start_year": 2009
+    },
+    {
+      "designer": "Victoria Beckham",
+      "end_year": 2010,
+      "start_year": 2010
+    }
+  ],
+  "United Bamboo": [
+    {
+      "designer": "Miho Aoki",
+      "end_year": 2012,
+      "start_year": 2004
+    },
+    {
+      "designer": "Thuy Pham",
+      "end_year": 2012,
+      "start_year": 2004
+    }
+  ],
+  "Valentino": [
+    {
+      "designer": "Alessandra Facchinetti",
+      "end_year": 2009,
+      "start_year": 2008
+    },
+    {
+      "designer": "Alessandro Michele",
+      "end_year": 2025,
+      "start_year": 2025
+    },
+    {
+      "designer": "Maria Grazia Chiuri",
+      "end_year": 2016,
+      "start_year": 2009
+    },
+    {
+      "designer": "Pierpaolo Piccioli",
+      "end_year": 2024,
+      "start_year": 2016
+    },
+    {
+      "designer": "Valentino Garavani",
+      "end_year": 2007,
+      "start_year": 2000
+    }
+  ],
+  "Vaquera": [
+    {
+      "designer": "Bryn Taubensee",
+      "end_year": 2025,
+      "start_year": 2017
+    },
+    {
+      "designer": "David Moses",
+      "end_year": 2025,
+      "start_year": 2017
+    },
+    {
+      "designer": "Patric DiCaprio",
+      "end_year": 2025,
+      "start_year": 2017
+    }
+  ],
+  "Vena Cava": [
+    {
+      "designer": "Lisa Mayock",
+      "end_year": 2013,
+      "start_year": 2006
+    },
+    {
+      "designer": "Sophie Buhai",
+      "end_year": 2013,
+      "start_year": 2006
+    }
+  ],
+  "Veronica Beard": [
+    {
+      "designer": "Veronica Miele Beard",
+      "end_year": 2025,
+      "start_year": 2013
+    },
+    {
+      "designer": "Veronica Swanson Beard",
+      "end_year": 2025,
+      "start_year": 2013
+    }
+  ],
+  "Versace": [
+    {
+      "designer": "Donatella Versace",
+      "end_year": 2025,
+      "start_year": 1992
+    },
+    {
+      "designer": "Gianni Versace",
+      "end_year": 2012,
+      "start_year": 1991
+    }
+  ],
+  "Viktor & Rolf": [
+    {
+      "designer": "Rolf Snoereg",
+      "end_year": 2024,
+      "start_year": 2000
+    },
+    {
+      "designer": "Viktor Horsting",
+      "end_year": 2024,
+      "start_year": 2000
+    }
+  ],
+  "Viktor Rolf": [
+    {
+      "designer": "Rolf Snoereg",
+      "end_year": 2021,
+      "start_year": 1999
+    },
+    {
+      "designer": "Viktor Horsting",
+      "end_year": 2021,
+      "start_year": 1999
+    }
+  ],
+  "William Rast": [
+    {
+      "designer": "Justin Timberlake",
+      "end_year": 2010,
+      "start_year": 2009
+    },
+    {
+      "designer": "Trace Ayala",
+      "end_year": 2010,
+      "start_year": 2009
+    }
+  ]
+}
