@@ -1,4 +1,4 @@
-from account import *
+from src_wikibase.account import *
 import requests
 import logging
 from wikibaseintegrator import WikibaseIntegrator, datatypes,  wbi_helpers
@@ -45,7 +45,7 @@ def create_property_in_wikibase(label, description, datatype):
         print(f"Property {label} already exists in Wikibase.")
         pass
     else:
-        #wbi_wikibase = WikibaseIntegrator()
+        wbi_wikibase = WikibaseIntegrator()
         # Create a new property object
         new_property = wbi_wikibase.property.new()
         # Set the label of the property (name/title of the property)
@@ -108,7 +108,7 @@ def copy_property_wikibase(property_label, equivalent_property = True):
                 return None
             
             # Initialize Wikibase Integrator
-            wbi = WikibaseIntegrator()
+            wbi = WikibaseIntegrator(login=login_wikibase)
 
             # Create new property in Wikibase
             new_property = wbi.property.new()
@@ -139,7 +139,7 @@ def copy_property_wikibase(property_label, equivalent_property = True):
                 new_property.add_claims(wikidata_id_statement)
 
             # Write to Wikibase
-            new_property.write(login=login_wikibase)
+            new_property.write(mediawiki_api_url=wikibase_api_url, login=login_wikibase)
             logging.info(f"Successfully copied property {property_id} ({property_label}) to Wikibase.")
 
         except MWApiError as e:

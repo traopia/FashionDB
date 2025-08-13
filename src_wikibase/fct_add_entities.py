@@ -1,5 +1,5 @@
-from account import *
-from fct_add_properties_wikibase import get_property_id_by_label
+from src_wikibase.account import *
+from src_wikibase.fct_add_properties_wikibase import get_property_id_by_label
 from wikibaseintegrator import datatypes,  wbi_helpers
 from wikibaseintegrator.wbi_enums import ActionIfExists
 from wikibaseintegrator.models.descriptions import Descriptions
@@ -91,6 +91,16 @@ wikidata_properties_id = { "instance of": "P31", "occupation": "P106", "subclass
                           "date of death":"P570", "country of citizenship": "P27", "sex or gender":"P21",
                           "educated at": "P69", "occupation":"P106","employer":"P108","work location":"P937",
                           "award received":"P166", "located in the administrative territorial entity": "P131"}
+
+
+classes_wikidata = {"fashion designer": "Q3501317", "fashion house": "Q1941779", "business": "Q4830453",
+                            "academic institution": "Q4671277", "geographic location": "Q2221906", "fashion award": "Q28928544",
+                            "occupation": "Q12737077", "award": "Q618779", "concept": "Q151885", "human": "Q5", "organization": "Q43229",
+                            "brand": "Q431289","lifestyle brand": "Q6545498", "privately held company":"Q1589009", "fashion label":"Q1618899",
+                            "grand couturier": "Q4845479", "fashion brand": "Q1618899"}
+
+
+
 wikibase_properties_id = {"instance of": get_property_id_by_label("instance of", wikibase_api_url),
                     "reference URL": get_property_id_by_label("reference URL", wikibase_api_url),
                     "start time": get_property_id_by_label("start time", wikibase_api_url),
@@ -132,12 +142,6 @@ wikibase_properties_id = {"instance of": get_property_id_by_label("instance of",
                     "fashion house X fashion collection": get_property_id_by_label("fashion house X fashion collection", wikibase_api_url),
                     "designer of collection": get_property_id_by_label("designer of collection", wikibase_api_url)}
 
-classes_wikidata = {"fashion designer": "Q3501317", "fashion house": "Q1941779", "business": "Q4830453",
-                            "academic institution": "Q4671277", "geographic location": "Q2221906", "fashion award": "Q28928544",
-                            "occupation": "Q12737077", "award": "Q618779", "concept": "Q151885", "human": "Q5", "organization": "Q43229",
-                            "brand": "Q431289","lifestyle brand": "Q6545498", "privately held company":"Q1589009", "fashion label":"Q1618899",
-                            "grand couturier": "Q4845479", "fashion brand": "Q1618899"}
-
 
 
 classes_wikibase = {"fashion designer": get_entity_id_by_label("fashion designer", "wikibase")[0],
@@ -151,14 +155,14 @@ classes_wikibase = {"fashion designer": get_entity_id_by_label("fashion designer
                         "human": get_entity_id_by_label("human","wikibase")[0],
                         "organization": get_entity_id_by_label("organization","wikibase")[0],
                         "brand": get_entity_id_by_label("brand","wikibase")[0],
-                        "lifestyle brand": get_entity_id_by_label("lifestyle brand","wikibase")[0],
+                        # "lifestyle brand": get_entity_id_by_label("lifestyle brand","wikibase")[0],
                         "privately held company": get_entity_id_by_label("privately held company","wikibase")[0],
                         "fashion award": get_entity_id_by_label("fashion award", "wikibase")[0],
-                        "fashion season": get_entity_id_by_label("fashion season", "wikibase")[0],
-                        "fashion show category": get_entity_id_by_label("fashion show category", "wikibase")[0],
-                        "fashion season collection": get_entity_id_by_label("fashion season collection", "wikibase")[0],
-                        "fashion journalist": get_entity_id_by_label("fashion journalist", "wikibase")[0],
-                        }# if get_entity_id_by_label("business", "wikibase") else None
+                        # "fashion season": get_entity_id_by_label("fashion season", "wikibase")[0],
+                        # "fashion show category": get_entity_id_by_label("fashion show category", "wikibase")[0],
+                        # "fashion season collection": get_entity_id_by_label("fashion season collection", "wikibase")[0],
+                        # "fashion journalist": get_entity_id_by_label("fashion journalist", "wikibase")[0],
+                        }# if get_entity_id_by_label("business", "wikibase") else None]
 
 
 class helper_add_entities_wikibase:
@@ -294,7 +298,7 @@ class helper_add_entities_wikibase:
         entity = wbi_wikibase.item.new()
         entity.labels.set('en', label)
         source = "BOF" if "businessoffashion" in reference_URL else "FMD" if "fashionmodeldirectory" in reference_URL else "Vogue" if "vogue" in reference_URL else "fmd"
-        entity.descriptions.set('en', f"{label} is a {class_label} from {source}. ")
+        entity.descriptions.set('en', f"{label} is a {class_label}. ")
         # if class_label == "fashion designer" and not reference_URL:
         #     reference_URL = f"https://www.fashionmodeldirectory.com/designers/{label.lower().replace(' ','-')}/"
         # elif class_label == "fashion house" and not reference_URL:

@@ -1,9 +1,26 @@
 import pandas as pd
 import re 
+import ahocorasick  
+import unicodedata
+from thefuzz import fuzz, process
 
-import ahocorasick  # pip install pyahocorasick
+def to_list(x):
+    if isinstance(x, list):
+        return x
+    if isinstance(x, np.ndarray):
+        return x.tolist()
+    if x is None:
+        return []
+    return [x] if not isinstance(x, (list, tuple)) else list(x)
 
+def assign_designer_to_fashion_house(df, fashion_house, designer_name):
 
+    mask = df["fashion_house"] == fashion_house
+    if mask.any():
+        df.loc[mask, "designer_name"] = pd.Series([designer_name] * mask.sum(), index=df.index[mask])
+    else:
+        print(f"No rows found for fashion house: {fashion_house}")
+    return df
 
 
 def extract_birth_year(text, min_year=1850, max_year=2025):
@@ -13,8 +30,7 @@ def extract_birth_year(text, min_year=1850, max_year=2025):
     years = [int(y) for y in years if min_year <= int(y) <= max_year]
     return min(years) if years else None
 
-
-def propagate_single(row, df):
+def propagate_single(row, df, founder_lookup):
     fh, yr = row.fashion_house, row.year
     current_names = row.designer_names
 
@@ -29,15 +45,27 @@ def propagate_single(row, df):
     # If multiple designers with 2 or fewer names,
     # check if exact same list appears in neighbor years
     elif 1 < len(current_names) <= 2:
+        # Prioritize founder if present in current_names
+        founders = founder_lookup.get(fh, [])
+        if founders:
+            # intersect founders and current_names
+            founders_in_current = [name for name in current_names if name in founders]
+            if founders_in_current:
+                # prioritize founders only
+                current_names = founders_in_current
+            # else keep current_names as is (no founders present)
+
+        years_to_check = range(yr - 3, yr + 3)
         neighbors = df.loc[
             (df.fashion_house == fh) &
-            (df.year.isin([yr - 3, yr, yr + 3])) &
+            (df.year.isin(years_to_check)) &
             (df.index != row.name)
         ]
         # Check if any neighbor has exactly the same designer list (order ignored)
-        repeated = neighbors["designer_names"].apply(
-            lambda x: len(x) == len(current_names) and same_names(x, current_names)
-        ).any()
+        repeated = all(
+            any(same_names(x, current_names) for x in df[df.year == y]["designer_names"])
+            for y in years_to_check if y != yr
+        )
         if not repeated:
             current_names = []
 
@@ -68,76 +96,294 @@ def propagate_single(row, df):
 
     return current_names
 
+
+
 def fill_empty_designer_names(df):
+    # Ensure every value in designer_name is a list
+    df = df.copy()
+    df["designer_name"] = df["designer_name"].apply(to_list)
+
     # Ensure sorted by fashion_house and year
     df = df.sort_values(["fashion_house", "year"]).reset_index(drop=True)
 
-    # Create a copy of the designer_names column to modify
+    # Copy to modify
     filled = df["designer_name"].copy()
 
-    # For each fashion house, fill empty designer_names from closest year
+    # Fill within each fashion house
     for fh, group in df.groupby("fashion_house"):
-        years = group["year"].values
-        names = group["designer_name"].values
-
-        # Indices of rows in original df for this fashion house
         indices = group.index.values
+        years = group["year"]
 
-        # For each empty designer_names, find closest non-empty
-        for i, name_list in zip(indices, names):
-            if len(name_list) == 0:
+        for i in indices:
+            if len(df.at[i, "designer_name"]) == 0:
                 year = df.at[i, "year"]
 
-                # Find candidates with non-empty designer_names
-                non_empty = [(idx, abs(year - df.at[idx, "year"])) 
-                             for idx in indices if len(df.at[idx, "designer_name"]) > 0]
+                # Find nearest year with a non-empty list
+                non_empty = [
+                    (idx, abs(year - df.at[idx, "year"]))
+                    for idx in indices
+                    if len(df.at[idx, "designer_name"]) > 0
+                ]
 
                 if non_empty:
-                    # Pick index with minimum year difference
                     closest_idx = min(non_empty, key=lambda x: x[1])[0]
-
-                    # Assign that designer_names list
                     filled.at[i] = df.at[closest_idx, "designer_name"]
 
     df["designer_name"] = filled
     return df
 
 
-if __name__ == "__main__":
-    #designer lists
-    bio_designers = pd.read_json("data/designer_data_fmd.json", lines=True)
-    bio_designers["year_birth"] = bio_designers["biography"].apply(extract_birth_year)
-    designers_fmd = bio_designers[bio_designers["year_birth"]>1910].designer_name
-    designer_bof = pd.read_json("data/all_designer_data_BOF.json", lines=True).designer_name
-    additional_designers = pd.read_csv("data/names/additional_designers.csv").designer_name
-    all_designers = set(list(designers_fmd )+ list(designer_bof )+ list(additional_designers))
 
-    #df
+import ast
+
+def extract_names_from_KG(kg_string, properties=["founded_by", "designer_employed"]):
+    all_names = []
+    try:
+        # Convert string to Python dict safely
+        kg_dict = ast.literal_eval(kg_string)
+        for property in properties:
+            # Extract from specified properties
+            names = [entry[0] for entry in kg_dict.get(property, []) if entry]
+            all_names += names  # <- fix here
+        
+        return all_names
+    except Exception:
+        return []  # If parsing fails
+    
+
+def any_name_in_designers(names, designer_list):
+    return any(name in designer_list for name in names)
+
+
+
+def clean_and_merge_names(name_set, threshold=90):
+    # Step 1: Remove None, empty, whitespace-only
+    cleaned = {n.strip() for n in name_set if n and n.strip()}
+    
+    # Step 2: Convert to title case
+    cleaned = {n.title() for n in cleaned}
+    
+    # Step 3: Keep only names with at least two words
+    cleaned = {n for n in cleaned if len(n.split()) >= 2}
+    
+    # Step 4: Merge similar names
+    merged = set()
+    processed = set()
+    
+    for name in cleaned:
+        if name in processed:
+            continue
+        
+        # Find all similar names
+        similar = [n for n in cleaned if fuzz.ratio(name, n) >= threshold]
+        
+        # Choose canonical as shortest for now
+        canonical = sorted(similar, key=lambda x: len(x))[0]
+        merged.add(canonical)
+        
+        # Mark similar ones as processed
+        processed.update(similar)
+    
+    return merged
+
+
+def is_close_match(brand_name, choices, threshold=90):
+    # Returns True if best match score >= threshold
+    best_match, score = process.extractOne(brand_name, choices)
+    return score >= threshold
+
+
+
+def strip_accents(text):
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', text)
+        if unicodedata.category(c) != 'Mn'
+    )
+
+
+def build_founder_lookup(df_fh_fmd, df_extracted_fashion_house, fashion_houses):
+    # From FMD brand data
+    founder_lookup_all = (
+        df_fh_fmd[df_fh_fmd["founded_by"].apply(lambda x: x != [None])]
+        .set_index("brand_name")["founded_by"]
+        .to_dict()
+    )
+
+    # From extracted KG
+    founder_lookup_extr = df_extracted_fashion_house.set_index("brand_name")["founder"].to_dict()
+
+    # Merge — only add if not already present
+    founder_lookup = {k: founder_lookup_all[k] for k in fashion_houses if k in founder_lookup_all}
+    for k, v in founder_lookup_extr.items():
+        if k not in founder_lookup:
+            founder_lookup[k] = v
+
+    return founder_lookup
+
+
+def build_automaton(names):
+    A = ahocorasick.Automaton()
+    for name in names:
+        normalized = strip_accents(name.lower())
+        A.add_word(normalized, name)
+    A.make_automaton()
+    return A
+
+
+def find_names(text, automaton, threshold=85):
+    if not isinstance(text, str):
+        return []
+
+    normalized_text = strip_accents(text.lower())
+    candidates = set()
+
+    for end_idx, orig_name in automaton.iter(normalized_text):
+        start_idx = end_idx - len(strip_accents(orig_name.lower())) + 1
+        matched_substring = text[start_idx:end_idx+1]
+        candidates.add((orig_name, matched_substring))
+
+    return list({
+        orig_name
+        for orig_name, matched in candidates
+        if fuzz.ratio(strip_accents(orig_name.lower()), strip_accents(matched.lower())) >= threshold
+    })
+
+import numpy as np
+from collections import Counter
+
+def replace_one_off_designers(df):
+    # Make sure all designer_name entries are lists
+    df = df.copy()
+    df["designer_name"] = df["designer_name"].apply(to_list)
+
+    # Sort for closest-year logic
+    df = df.sort_values(["fashion_house", "year"]).reset_index(drop=True)
+    filled = df["designer_name"].copy()
+
+    for fh, group in df.groupby("fashion_house"):
+        indices = group.index.tolist()
+
+        # Flatten all names for this fashion house
+        all_names = [
+            name for sublist in group["designer_name"]
+            for name in sublist
+            if name is not None and str(name).strip() != ""
+        ]
+        counts = Counter(all_names)
+
+        # Designers that appear only 4 times (1 year)
+        one_offs = {name for name, cnt in counts.items() if cnt <=4}
+
+        if one_offs:
+            for rare_name in one_offs:
+                for idx in indices:
+                    if rare_name in df.at[idx, "designer_name"]:
+                        year = df.at[idx, "year"]
+
+                        # Find closest row with non-empty designer_name and without the rare_name
+                        non_empty = [
+                            (other_idx, abs(year - df.at[other_idx, "year"]))
+                            for other_idx in indices
+                            if other_idx != idx
+                            and len(df.at[other_idx, "designer_name"]) > 0
+                            and rare_name not in df.at[other_idx, "designer_name"]
+                        ]
+                        if non_empty:
+                            closest_idx = min(non_empty, key=lambda x: x[1])[0]
+                            val = df.at[closest_idx, "designer_name"]
+                            filled.at[idx] = list(val) if isinstance(val, (list, tuple, np.ndarray)) else [val]
+
+    df["designer_name"] = filled
+    return df
+
+
+
+
+if __name__ == "__main__":
+    # === Load and filter main DF ===
     df = pd.read_parquet("data/vogue_data.parquet")
     df = df[df.groupby("fashion_house")["fashion_house"].transform("count") >= 10]
+    df = df.drop(columns=[c for c in ["designer_names", "designer_name"] if c in df.columns])
+
+    # === Load designer sources ===
+    bio_designers = pd.read_json("data/designer_data_fmd.json", lines=True)
+    bio_designers["year_birth"] = bio_designers["biography"].apply(extract_birth_year)
+    designers_fmd = bio_designers[bio_designers["year_birth"] > 1910].designer_name
+
+    designer_bof = pd.read_json("data/all_designer_data_BOF.json", lines=True).designer_name
+    additional_designers = pd.read_csv("data/names/additional_designers.csv").designer_name
+
+    df = df.dropna(subset=["description"]) 
+
+    # === Founders from extracted KG ===
+    df_extracted_fashion_house = pd.read_json("data/extracted_KG/extracted_KG_fmd_fashion_houses.json", lines=True)
+    unique_houses = df['fashion_house'].dropna().unique()
+    mask = df_extracted_fashion_house['brand_name'].apply(lambda x: is_close_match(x, unique_houses))
+    df_extracted_filtered = df_extracted_fashion_house[mask]
+
+    df_extracted_filtered['names_in_KG'] = df_extracted_filtered['KG'].apply(extract_names_from_KG)
+    df_extracted_filtered['founder'] = df_extracted_filtered['KG'].apply(extract_names_from_KG, properties=["founded_by"])
+
+    founders = {name for sublist in df_extracted_filtered["founder"] for name in sublist}
+    founders = clean_and_merge_names(founders, threshold=90)
+
+    # === All designer names ===
+    all_designers = set(designers_fmd) | set(designer_bof) | set(additional_designers) | set(founders) 
+
+    # === Build founder lookup dict ===
+    df_fh_fmd = pd.read_json("data/brand_data_fmd.json", lines=True)
+    founder_lookup = build_founder_lookup(df_fh_fmd, df_extracted_fashion_house, df.fashion_house.unique())
+
+    # === Build and apply automaton ===
+    automaton = build_automaton(all_designers)
+    df = df.dropna(subset=["description"])
+    df["designer_names"] = df["description"].apply(lambda t: find_names(t, automaton))
 
 
-    # Build automaton
-    A = ahocorasick.Automaton()
-    for name in all_designers:
-        A.add_word(name.lower(), name)
-    A.make_automaton()
-
-    def find_names(text):
-        matches = set()
-        for end_idx, orig_name in A.iter(text.lower()):
-            matches.add(orig_name)
-        return list(matches)
-
-    df = df.dropna(subset= ["description"])
-    df["designer_names"] = df["description"].apply(find_names)
 
 
+    # Assign founders for small fashion houses (<30 rows)
+    small_fhs = df['fashion_house'].value_counts()
+    small_fhs = small_fhs[small_fhs < 25].index.tolist()
+    mask_small_fh = df["fashion_house"].isin(small_fhs)
+
+    df.loc[mask_small_fh, "designer_name"] = df.loc[mask_small_fh, "fashion_house"].map(founder_lookup)
+
+
+
+    # === Fill missing designer_name from founders ===
     df["year"] = df["year"].astype(int)
-    # Sort to make shifting easier
     df = df.sort_values(["fashion_house", "year"]).reset_index(drop=True)
-    # Apply propagation
-    df["designer_name"] = df.apply(lambda r: propagate_single(r, df), axis=1)
+    df["designer_name"] = df.apply(lambda r: propagate_single(r, df, founder_lookup), axis=1)
 
-    df = fill_empty_designer_names(df)
+    mask_designer = df["designer_name"].apply(lambda x: len(x) == 0)
+    mask_fh = df['fashion_house'].isin(founder_lookup.keys())
+    df.loc[mask_designer, "designer_name"] = df.loc[mask_fh, "fashion_house"].map(founder_lookup)
+
+    # === Final fill pass ===
+    #df = fill_empty_designer_names(df)
+
+    #remove one off designers as probably spurious 
+    df = replace_one_off_designers(df)
+
+    df = assign_designer_to_fashion_house(df, "Aquascutum", ["John Emary"])
+    df = assign_designer_to_fashion_house(df, "Area", ["Beckett Fogg and Piotrek Panszczyk"])
+    df = assign_designer_to_fashion_house(df, "Nehera", ["Samuel Drira"])
+    df = assign_designer_to_fashion_house(df, "Matthew Williamson", ["Matthew Williamson"])
+
+    df = assign_designer_to_fashion_house(df, "Limi Feu" ,[ "Limi Yamamoto"])
+    df = assign_designer_to_fashion_house(df,"Lazoschmidl" ,["Johannes Schmidl"] )
+    df = assign_designer_to_fashion_house(df,"Kolor" ,["Junichi Abe"] )
+    df = assign_designer_to_fashion_house(df,"Kiton" , ["Ciro Paone"] )
+    df = assign_designer_to_fashion_house(df, "Audra", ["Audra Noyes" ])
+    df = assign_designer_to_fashion_house(df, "Au Jour Le Jour", [ "Diego Marquez", "Mirko Fontana"])
+    df = assign_designer_to_fashion_house(df, "Babyghost", ["Qiaoran Huang","Joshua Hupper"] )
+    df = assign_designer_to_fashion_house(df,"Badgley Mischka" , ["James Mischka", "Mark Badgley"] )
+    df = assign_designer_to_fashion_house(df,"Baja East" , ["John Targon", "Scott Studenberg"] )
+    df = assign_designer_to_fashion_house(df, "Bally", ["Rhuigi Villaseñor"] )
+    df = assign_designer_to_fashion_house(df, "Blumarine", ["Anna Molinari"] )
+    df = assign_designer_to_fashion_house(df, "Boglioli", ["Davide Marello"] )
+    df = assign_designer_to_fashion_house(df, "Brian Reyes", ["Brian Reyes"] )
+    # Save
     df.to_parquet("data/vogue_data.parquet")
+

@@ -66,7 +66,8 @@ class populate_wikibase_src:
         return value_labels
     
     def extract_qualifiers(self,col_label, value_label):
-        KG = self.fashion_agent_info_extracted.KG.values.all()
+        KG = self.fashion_agent_info_extracted.KG.values#.all()
+        print(KG, type(KG))
         if col_label in KG and isinstance(KG[col_label], list):
             for entry in KG[col_label]:
                 if entry and entry[0] == value_label:
@@ -297,15 +298,16 @@ def main(fashion_agent_type, BOF, one_to_do, name_index):
     elif fashion_agent_type == "fashion house":
         df_properties = pd.read_json("data/brand_data_fmd.json", lines = True)
         df_properties_extracted = pd.read_json("data/extracted_KG/extracted_KG_fmd_fashion_houses.json", lines = True)
-        vogue_brands = pd.read_csv("data/names/vogue.csv").brand_name.tolist()
-        df_properties_extracted = df_properties_extracted[df_properties_extracted.brand_name.isin(vogue_brands)]
+        fashion_houses_to_do = pd.read_parquet("data/vogue_data.parquet").fashion_house.unique().tolist()
+        df_properties_extracted = df_properties_extracted[df_properties_extracted.brand_name.isin(fashion_houses_to_do)]
 
     df_properties_extracted["KG"] = df_properties_extracted["KG"].apply(lambda x: ast.literal_eval(x))
     df_properties_extracted["model"] = df_properties_extracted["model"].fillna("https://ollama.com/library/gemma2")
     df_properties_extracted["model"] = df_properties_extracted["model"].apply(lambda x: "https://ollama.com/library/gemma2" if x == "gemma2" else "https://platform.openai.com/docs/models#gpt-4o-mini" if x == "gpt-4o-mini" else x)
 
-    all_fashion_agents = df_properties_extracted.designer_name.unique().tolist() if fashion_agent_type == "fashion designer" else df_properties_extracted.brand_name.unique().tolist()
+    all_fashion_agents = df_properties_extracted.designer_name.unique().tolist() if fashion_agent_type == "fashion designer" else fashion_houses_to_do
     all_fashion_agents.sort()
+
     
     index_fashion_agents = all_fashion_agents.index(name_index)  if name_index in all_fashion_agents else None
     
@@ -322,9 +324,9 @@ def main(fashion_agent_type, BOF, one_to_do, name_index):
             add_info.add_info_designers_BOF()
 
 if __name__ == "__main__":
-    fashion_agent_type = "fashion_designer"
-    BOF = True
-    one_to_do = True
-    name_index = "Pierpaolo Piccioli"
+    fashion_agent_type = "fashion house"
+    BOF = False
+    one_to_do = False
+    name_index = "Aalto"
 
     main(fashion_agent_type, BOF, one_to_do, name_index)

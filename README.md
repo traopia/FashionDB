@@ -11,7 +11,7 @@ Wikipedia: <br/>
 
 Procedure:<br/>
 1. Scraping data<br/>
-Scraped Vogue for a list of fashion houses whose collections are available, and scraped collections' informations and URLs of images of fashion collections. <br/>
+Scraped Vogue for a list of fashion houses whose collections are available, and scraped collections' informations and URLs of images of fashion collections. Keep only fashion houses with at least 10 collections.<br/>
 ``` scrapers/scrape_fashion_shows_vogue.py ``` --> data/vogue_data.parquet <br/>
 Scraped FMD for information (textual and structured) about designers and fashion houses. <br/>
 ``` scrapers/scrape_names_fmd.py var "designers"``` --> <br/>
@@ -25,10 +25,10 @@ Get all entities of type fashion house, and with occupation fashion designer fro
 
 
 2. Extracting structured information from scraped texts.<br/>
-Assign collection to fashion designers. Use the names previously scraped and the collection descriptions.<br/>
-```extract_info/assign_designer_to_collection.py``` --> data/vogue_data.parquet<br/>
 Extract info from biographies of designers and fashion houses using LLMs<br/>
 ```extract_info/knowledge_extraction_fashion.py``` --> data/extracted_KG <br/>
+Assign collection to fashion designers. Use the names previously scraped and the collection descriptions, and the names extracted from the bio. <br/>
+```extract_info/assign_designer_to_collection.py``` --> data/vogue_data.parquet<br/>
 
 
 3. Data cleaning and preparation
@@ -37,7 +37,7 @@ Extract info from biographies of designers and fashion houses using LLMs<br/>
 4. Uploading to wikibase, host of FashionDB
 Populate with the ontology and properties<br/>
 ```populate_ontology_fashionDB.ipynb``` <br/>
-Populate with structured data<br/>
+Populate with structured data. Based on fashion houses and fashion designers extracted information.<br/>
 ```populate_fashionDB.py``` <br/>
 Populate with fashion collections<br/>
 ```populate_wikifashion_fashion_collections.py``` <br/>

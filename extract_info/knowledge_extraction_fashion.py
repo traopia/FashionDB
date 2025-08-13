@@ -136,7 +136,7 @@ def load_data(fashion_agent_type, source):
     df_properties = pd.read_json(INPUT_FILE, lines=True)
     if fashion_agent_type == "fashion house":
         df_properties = df_properties[df_properties.about.notnull()]
-        vogue = pd.read_csv('data/names/vogue.csv').brand_name.unique().tolist()
+        vogue = pd.read_parquet('data/vogue_data.parquet').fashion_house.unique().tolist()
         fashion_agents = list(set(df_properties[col_name].unique()) & set(vogue))
         
         fashion_agents.sort()
