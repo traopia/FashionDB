@@ -120,7 +120,7 @@ def scrape_multiple_designers(designers, output_file):
 
 
 def main():
-    output_file = "data/all_designer_data_BOF.json"
+    output_file = "data/scraped_data/all_designer_data_BOF.json"
     #designers = pd.read_csv("data/query_wikibase/query-designers-wikibase.csv").fashionDesignerLabel.unique().tolist()
     designers = get_designers()
     scrape_multiple_designers(designers, output_file)

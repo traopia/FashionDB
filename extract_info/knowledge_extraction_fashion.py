@@ -96,13 +96,13 @@ def load_data(fashion_agent_type, source):
     if fashion_agent_type == "fashion designer":
         col_name = "designer_name"
         if source=="BOF":
-            INPUT_FILE = "data/all_designer_data_BOF.json"
+            INPUT_FILE = "data/scraped_data/all_designer_data_BOF.json"
             OUTPUT_FILE = "data/extracted_KG/extracted_KG_BOF_fashion_designers.json"
         if source == "fmd":
-            INPUT_FILE = "data/designer_data_fmd.json"
+            INPUT_FILE = "data/scraped_data/designer_data_fmd.json"
             OUTPUT_FILE = "data/extracted_KG/extracted_KG_fmd_fashion_designers.json"
         if source == "wikipedia":
-            INPUT_FILE = "data/designer_wikipedia_bio.jsonl"
+            INPUT_FILE = "data/scraped_data/designer_wikipedia_bio.jsonl"
             OUTPUT_FILE = "data/extracted_KG/extracted_KG_wikipedia_fashion_designers.json"
         
         ontology = """\nOntology Relations: {"educated_at": [[academic institution, start_date, end_date]], "employer": [[fashion house, title, start_date, end_date]], "work_location": [[city, start_date, end_date]], "award_received": [[fashion award, year]]}"""

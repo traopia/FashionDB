@@ -42,4 +42,7 @@ Populate with structured data. Based on fashion houses and fashion designers ext
 Populate with fashion collections<br/>
 ```populate_wikifashion_fashion_collections.py``` <br/>
 
+Refine fashion sdesigner assignment to collections based on FashionDB informations. <br>
+
+
 

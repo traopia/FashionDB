@@ -149,7 +149,7 @@ def scrape_designers(output_file, names):
 
 
 def main(designer_to_scrape=None, designer_index = False):
-    output_file = "data/designer_data_fmd.json"
+    output_file = "data/scraped_data/designer_data_fmd.json"
     names_df = pd.read_csv("data/names/designer_data_fmd_names.csv")
 
     if designer_index:

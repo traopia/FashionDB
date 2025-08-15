@@ -163,7 +163,7 @@ def fill_empty_designer_names(df):
 
 import ast
 
-def extract_names_from_KG(kg_string, properties=["founded_by", "designer_employed"]):
+def extract_names_from_KG(kg_string, properties):
     all_names = []
     try:
         # Convert string to Python dict safely
@@ -283,9 +283,11 @@ def find_names(text, automaton, threshold=85):
     })
 
 
+from collections import Counter
+import numpy as np
 
 def replace_one_off_designers(df):
-    # Make sure all designer_name entries are lists
+    # Ensure designer_name is always a list
     df = df.copy()
     df["designer_name"] = df["designer_name"].apply(to_list)
 
@@ -300,31 +302,36 @@ def replace_one_off_designers(df):
         all_names = [
             name for sublist in group["designer_name"]
             for name in sublist
-            if name is not None and str(name).strip() != ""
+            if name and str(name).strip() != ""
         ]
         counts = Counter(all_names)
 
-        # Designers that appear only 4 times (1 year)
-        one_offs = {name for name, cnt in counts.items() if cnt <=4}
+        # Designers that appear <= 4 times
+        one_offs = {name for name, cnt in counts.items() if cnt <= 4}
 
-        if one_offs:
-            for rare_name in one_offs:
-                for idx in indices:
-                    if rare_name in df.at[idx, "designer_name"]:
-                        year = df.at[idx, "year"]
+        for idx in indices:
+            current_names = df.at[idx, "designer_name"]
 
-                        # Find closest row with non-empty designer_name and without the rare_name
-                        non_empty = [
-                            (other_idx, abs(year - df.at[other_idx, "year"]))
-                            for other_idx in indices
-                            if other_idx != idx
-                            and len(df.at[other_idx, "designer_name"]) > 0
-                            and rare_name not in df.at[other_idx, "designer_name"]
-                        ]
-                        if non_empty:
-                            closest_idx = min(non_empty, key=lambda x: x[1])[0]
-                            val = df.at[closest_idx, "designer_name"]
-                            filled.at[idx] = list(val) if isinstance(val, (list, tuple, np.ndarray)) else [val]
+            for rare_name in list(current_names):
+                if rare_name in one_offs:
+                    year = df.at[idx, "year"]
+
+                    # Find closest row with non-empty designer_name not containing rare_name
+                    candidates = [
+                        (other_idx, abs(year - df.at[other_idx, "year"]))
+                        for other_idx in indices
+                        if other_idx != idx
+                        and len(df.at[other_idx, "designer_name"]) > 0
+                        and rare_name not in df.at[other_idx, "designer_name"]
+                    ]
+                    if candidates:
+                        closest_idx = min(candidates, key=lambda x: x[1])[0]
+                        replacement_names = df.at[closest_idx, "designer_name"]
+
+                        # Merge old and new names, removing the rare one
+                        merged = [n for n in current_names if n != rare_name] + list(replacement_names)
+                        merged = deduplicate_and_split(merged)
+                        filled.at[idx] = merged
 
     df["designer_name"] = filled
     return df
@@ -339,7 +346,7 @@ def deduplicate_and_split(names):
     - Split compound names like "Viktor & Rolf" into ["Viktor", "Rolf"]
     - Remove shorter semi-duplicates when a longer name exists
     """
-    if not isinstance(names, np.ndarray):
+    if not isinstance(names, np.ndarray) or not isinstance(names, list):
         return names
 
     # Step 1: split all compound names
@@ -377,18 +384,21 @@ def extract_person_names(text):
 
 
 
+
 if __name__ == "__main__":
     # === Load and filter main DF ===
     df = pd.read_parquet("data/vogue_data.parquet")
     df = df[df.groupby("fashion_house")["fashion_house"].transform("count") >= 10]
     df = df.drop(columns=[c for c in ["designer_names", "designer_name", "designer_source"] if c in df.columns])
 
+    designers = pd.read_json("data/names/fashion_show_data_all_designer.json", lines=True)
+    df = pd.merge(df, designers[["URL", "designer_final"]])
     # === Load designer sources ===
-    bio_designers = pd.read_json("data/designer_data_fmd.json", lines=True)
+    bio_designers = pd.read_json("data/scraped_data/designer_data_fmd.json", lines=True)
     bio_designers["year_birth"] = bio_designers["biography"].apply(extract_birth_year)
     designers_fmd = bio_designers[bio_designers["year_birth"] > 1910].designer_name
 
-    designer_bof = pd.read_json("data/all_designer_data_BOF.json", lines=True).designer_name
+    designer_bof = pd.read_json("data/scraped_data/all_designer_data_BOF.json", lines=True).designer_name
     additional_designers = pd.read_csv("data/names/additional_designers.csv").designer_name
 
     df = df.dropna(subset=["description"])  # just in case
@@ -410,7 +420,7 @@ if __name__ == "__main__":
     mask = df_extracted_fashion_house['brand_name'].apply(lambda x: is_close_match(x, unique_houses))
     df_extracted_filtered = df_extracted_fashion_house[mask]
 
-    df_extracted_filtered['names_in_KG'] = df_extracted_filtered['KG'].apply(extract_names_from_KG)
+    df_extracted_filtered['names_in_KG'] = df_extracted_filtered['KG'].apply(extract_names_from_KG, properties=["founded_by", "designer_employed"])
     df_extracted_filtered['founder'] = df_extracted_filtered['KG'].apply(extract_names_from_KG, properties=["founded_by"])
 
     founders = {name for sublist in df_extracted_filtered["founder"] for name in sublist}
@@ -421,7 +431,7 @@ if __name__ == "__main__":
 
 
     # === Build founder lookup dict ===
-    df_fh_fmd = pd.read_json("data/brand_data_fmd.json", lines=True)
+    df_fh_fmd = pd.read_json("data/scraped_data/brand_data_fmd.json", lines=True)
     founder_lookup = build_founder_lookup(df_fh_fmd, df_extracted_fashion_house, df.fashion_house.unique())
 
     # === Build and apply automaton ===
@@ -429,7 +439,10 @@ if __name__ == "__main__":
     df = df.dropna(subset=["description"])
     df["designer_names"] = df["description"].apply(lambda t: find_names(t, automaton))
 
+    #if designer_names empty automata with NER names 
 
+    mask_designer = df["designer_names"].apply(lambda x: len(x) == 0)
+    df.loc[mask_designer, "designer_names"] = (df.loc[mask_designer, "designer_final"].apply(lambda x: x.copy() if isinstance(x, list) else x))
 
 
     # Assign founders for small fashion houses (<30 rows)
@@ -444,7 +457,14 @@ if __name__ == "__main__":
     # === Fill missing designer_name from founders ===
     df["year"] = df["year"].astype(int)
     df = df.sort_values(["fashion_house", "year"]).reset_index(drop=True)
+    df["designer_name"] = df["designer_name"].apply(to_list)
     df["designer_name"] = df.apply(lambda r: propagate_single(r, df, founder_lookup), axis=1)
+
+    mask_designer = df["designer_names"].apply(lambda x: len(x) == 0)
+    automaton = build_automaton(all_ner_names)
+    df.loc[mask_designer, "designer_names"] = (
+        df.loc[mask_designer, "description"]  # or the column with text to search
+        .apply(lambda text: find_names(text, automaton)))
 
     mask_designer = df["designer_name"].apply(lambda x: len(x) == 0)
     mask_fh = df['fashion_house'].isin(founder_lookup.keys())
@@ -494,12 +514,13 @@ if __name__ == "__main__":
     df = assign_designer_to_fashion_house(df, "Viktor & Rolf", ["Viktor Horsting","Rolf Snoereg"] )
     df = assign_designer_to_fashion_house(df, "Viktor Rolf", ["Viktor Horsting","Rolf Snoereg"] )
     df = assign_designer_to_fashion_house(df, "Nicholas K", ["Nicholas K"] )
+    df = assign_designer_to_fashion_house(df, "Bach Mai", ["Bach Mai"] )
     # Save
 
 
     df["designer_name"] = df["designer_name"].apply(deduplicate_and_split)
     df= df[df["designer_name"].apply(lambda x: len(x) !=0)]
-    df = df.drop(columns=[col for col in ["designer_names","ner_person_names"] if col in df.columns])
+    #df = df.drop(columns=[col for col in ["designer_names","ner_person_names"] if col in df.columns])
     df.to_parquet("data/vogue_data_cd.parquet")
 
     df_exp = df.explode("designer_name")

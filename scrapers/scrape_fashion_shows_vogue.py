@@ -8,7 +8,30 @@ import os
 import sys
 
 
+def all_designers_vogue():
+    # URL of the webpage to scrape
+    url = 'https://www.vogue.com/fashion-shows/designers'  # Replace with the actual URL
+    designer_list = []
+    # Send a GET request to the webpage
+    response = requests.get(url)
 
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Parse the HTML content using BeautifulSoup
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Find all the designer names
+        designers = []
+        for link in soup.find_all('a', class_='NavigationInternalLink-cWEaeo kHWqlu grouped-navigation__link link--primary navigation__link'):
+            designers.append(link.get_text(strip=True))
+        
+        # Print the list of designer names
+        for designer in designers:
+
+            designer_list.append(designer)
+    else:
+        print(f'Failed to retrieve the webpage. Status code: {response.status_code}')
+    return designer_list
 
 def designer_to_shows(designer):
     # Replace spaces, punctuations, special characters, etc., with '-' and make lowercase
@@ -157,8 +180,8 @@ def extract_details_fashion_shows(fashion_string):
 
 
 def fashion_houses_to_be_done(out_path):
-    if os.path.exists("data/fashion_show_data_all_allpics.json"):
-        fashion_houses = pd.read_json("data/fashion_show_data_all_allpics.json", lines=True).fashion_house.unique().tolist()
+    if os.path.exists("data/vogue_data.parquet"):
+        fashion_houses = pd.read_parquet("data/vogue_data.parquet").fashion_house.unique().tolist()
     else:
         if os.path.exists('data/names/vogue.csv'):
             fashion_houses_vogue = pd.read_csv('data/names/vogue.csv').brand_name.unique().tolist()
@@ -178,23 +201,43 @@ def fashion_houses_to_be_done(out_path):
     return to_be_done
 
 def designer_to_shows_if_available(designer):
-    if os.path.exists("data/fashion_show_data_all_allpics.json"):
-        df = pd.read_json("data/fashion_show_data_all_allpics.json", lines=True)
+    if os.path.exists("data/vogue_data.parquet"):
+        df = pd.read_parquet("data/vogue_data.parquet")
         shows= df[df.fashion_house == designer].show.unique().tolist()
         return shows
     else:
         shows = designer_to_shows(designer)
         return shows
 
-def main(out_path, all_urls):
+import pyarrow as pa
+import pyarrow.parquet as pq
+import os
+
+def main_batch_parquet(out_path, all_urls, batch_size=50):
     fashion_houses_of_interest = fashion_houses_to_be_done(out_path)
+    batch = []
+
+    # Initialize ParquetWriter if file does not exist
+    writer = None
+    if os.path.exists(out_path):
+        # Existing schema
+        table = pq.read_table(out_path, columns=None)
+        schema = table.schema
+        writer = pq.ParquetWriter(out_path, schema, use_dictionary=True)
+    else:
+        schema = None  # Will infer from first batch
+
     for fashion_house in fashion_houses_of_interest:
         print("Scraping", fashion_house)
         fashion_house_scrape = fashion_house.lower().replace(' ', '-')
         shows = designer_to_shows_if_available(fashion_house)
+
         for show in shows:
-            fashion_house_scrape, show, description, editor, publish_date, image_urls = scrape_show_details(fashion_house_scrape, show, all_urls=all_urls)
+            fashion_house_scrape, show, description, editor, publish_date, image_urls = scrape_show_details(
+                fashion_house_scrape, show, all_urls=all_urls
+            )
             location, season, year, category = extract_details_fashion_shows(show)
+
             data = {
                 'fashion_house': fashion_house,
                 'show': show,
@@ -206,17 +249,35 @@ def main(out_path, all_urls):
                 'location': location,
                 'season': season,
                 'year': year,
-                'category': category}
-            
-            with open(out_path, 'a') as f:
+                'category': category
+            }
 
-                json.dump(data, f)
-                f.write('\n')
+            batch.append(data)
+
+            # Flush batch to Parquet
+            if len(batch) >= batch_size:
+                df_batch = pd.DataFrame(batch)
+                table = pa.Table.from_pandas(df_batch, preserve_index=False)
+                if writer is None:
+                    writer = pq.ParquetWriter(out_path, table.schema, use_dictionary=True)
+                writer.write_table(table)
+                batch = []
+
+    # Write remaining rows
+    if batch:
+        df_batch = pd.DataFrame(batch)
+        table = pa.Table.from_pandas(df_batch, preserve_index=False)
+        if writer is None:
+            writer = pq.ParquetWriter(out_path, table.schema, use_dictionary=True)
+        writer.write_table(table)
+
+    if writer:
+        writer.close()
+
+    print("✅ Finished processing all fashion shows.")
 
 
 if __name__ == "__main__":
-    out_path = "data/fashion_show_data_all_allpics.json"
-    main(out_path, all_urls=True)
-    df_all_pics = pd.read_json("data/fashion_show_data_all_allpics.json", lines=True)
-    df_all_pics.to_parquet("data/vogue_data.parquet")
+    out_path = "data/vogue_data.parquet"
+    main_batch_parquet(out_path, all_urls=True, batch_size = 50)
 

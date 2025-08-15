@@ -264,7 +264,7 @@ def scrape_brands(output_file, names):
 
 
 def main(brand_to_scrape=None, brand_index = False):
-    output_file = "data/brand_data_fmd.json"
+    output_file = "data/scraped_data/brand_data_fmd.json"
     names_df = pd.read_csv("data/names/brand_data_fmd_names.csv")
 
     if brand_index:

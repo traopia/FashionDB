@@ -1,0 +1,1 @@
+data/embeddings/fashion_clip.npy filter=lfs diff=lfs merge=lfs -text
