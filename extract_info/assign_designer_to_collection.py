@@ -55,7 +55,8 @@ def extract_birth_year(text, min_year=1850, max_year=2025):
         return None
     years = re.findall(r"\b(1[89]\d{2}|20\d{2})\b", text)  # captures 1800–2099
     years = [int(y) for y in years if min_year <= int(y) <= max_year]
-    return min(years) if years else None
+    #return min(years) if years else None
+    return years[0] if years else None
 
 def propagate_single(row, df, founder_lookup):
     fh, yr = row.fashion_house, row.year

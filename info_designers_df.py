@@ -61,7 +61,7 @@ def assign_place_of_birth(df, biography_col="biography"):
     return df
 
 
-bio_designers = pd.read_json("data/designer_data_fmd.json", lines=True)
+bio_designers = pd.read_json("data/scraped_data/designer_data_fmd.json", lines=True)
 bio_designers["year_birth"] = bio_designers["biography"].apply(extract_birth_year)
 bio_designers = assign_place_of_birth(bio_designers, biography_col="biography")
 
@@ -92,8 +92,8 @@ df_info["educationLabel"] = df_info["educationLabel"].apply(lambda x: x[0] if le
 df_info["education"] = df_info["educationLabel"].apply(lambda x: match_school(x, school_list))
 df_info["year_birth"] = pd.to_datetime(df_info["dateOfBirth"]).dt.year.astype(float)
 #df_info = df_info.replace({np.nan: None})
-df_info = df_info.rename(columns={"personLabel":"designer_name","placeOfBirthLabel":"place_of_birth"})
-df_info = df_info[["designer_name","place_of_birth","year_birth","education"]]
+df_info = df_info.rename(columns={"personLabel":"designer_name","placeOfBirthLabel":"place_of_birth", "countryLabel":"nationality"})
+df_info = df_info[["designer_name","place_of_birth","year_birth","education", "nationality"]]
 
 designer_info_df = pd.merge(df_info,bio_designers,  how="outer")
 
