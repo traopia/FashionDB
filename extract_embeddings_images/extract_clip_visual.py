@@ -201,7 +201,7 @@ def flush_embeddings(batch_embeddings, batch_urls):
     print(f"💾 Flushed {len(batch_embeddings)} embeddings. Total now: {embeddings_array.shape[0]}")
 
 def main():
-    path = "data/vogue_data.parquet"
+    path = "data/data_vogue_final.parquet"
     process_images_parquet(path, segment=True)
 
 
