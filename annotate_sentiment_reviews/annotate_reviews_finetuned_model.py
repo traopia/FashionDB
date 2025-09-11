@@ -1,4 +1,5 @@
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import os
 import pandas as pd
 from datasets import Dataset
 import torch
@@ -6,18 +7,22 @@ import numpy as np
 from annotate_reviews_llm import remove_named_entities
 
 
-output_path = "Data/all_reviews_annotated_finetuning.csv"
-full_data_path = "Data/final_dataset.json"
+output_path = "data/data_vogue_final_reviews.parquet"
+full_data_path = "data/data_vogue_final.parquet"
 device = torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
 
 
-model_dir = "./sentiment_model"  # or the absolute path if running from elsewhere
-tokenizer = AutoTokenizer.from_pretrained(model_dir)
-model = AutoModelForSequenceClassification.from_pretrained(model_dir)
+script_dir = os.path.dirname(os.path.abspath(__file__))
+model_root_dir = os.path.join(script_dir, "sentiment_model")
+# Load tokenizer from the base model used in training
+tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+# Load the fine-tuned model weights from the latest checkpoint
+model_checkpoint_dir = os.path.join(model_root_dir, "checkpoint-75")
+model = AutoModelForSequenceClassification.from_pretrained(model_checkpoint_dir, local_files_only=True)
 model.to(device)  # Ensure model is on MPS
 
 # Predict on all descriptions
-all_df = pd.read_json(full_data_path)
+all_df = pd.read_parquet(full_data_path)
 all_df['clean_description'] = all_df['description'].astype(str).apply(remove_named_entities)
 
 
@@ -52,5 +57,6 @@ for col in ['label', 'predicted_sentiment']:
     if col in all_df.columns:
         all_df = all_df.drop(columns=[col])
 
-all_df.to_csv(output_path, index=False)
+all_df.to_parquet(output_path)
+all_df = all_df.drop_duplicates(subset=["URL"])
 print(f"Saved predictions to {output_path}") 
