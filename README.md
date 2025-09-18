@@ -10,8 +10,8 @@ Sources: <br/>
 [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page): a knowledge graph related to Wikipedia hosted on a Wikibase <br/>
 [Wikipedia](https://en.wikipedia.org/wiki/Main_Page): encyclopedia<br/>
 
-Procedure:<br/>
-1. Scraping data<br/>
+# Procedure:<br/>
+## 1. Scraping data<br/>
 Scraped Vogue for a list of fashion houses whose collections are available, and scraped collections' informations and URLs of images of fashion collections. Keep only fashion houses with at least 10 collections.<br/>
 ``` scrapers/scrape_fashion_shows_vogue.py ``` → data/vogue_data.parquet <br/>
 Scraped FMD for information (textual and structured) about designers and fashion houses. <br/>
@@ -25,14 +25,14 @@ Get all entities of type fashion house, and with occupation fashion designer fro
 ```scrapers/sparql_query_wikidata.py``` → data/names/fashion_designers_wikidata.csv, data/names/fashion_houses_wikidata.csv
 
 
-2. Extracting structured information from scraped texts, data cleaning and preparation <br/>
+## 2. Extracting structured information from scraped texts, data cleaning and preparation <br/>
 Extract info from biographies of designers and fashion houses using LLMs<br/>
 ```extract_info/knowledge_extraction_fashion.py``` → data/extracted_KG <br/>
 Assign collection to fashion designers. Use the names previously scraped and the collection descriptions, and the names extracted from the bio. <br/>
 ```extract_info/assign_designer_to_collection.py``` → data/vogue_data.parquet<br/>
 
 
-3. Creating tables for HuggingFace dataset: 
+## 3. Creating tables for HuggingFace dataset: 
 Create the table about fashion collections <br/>
 ```final_df.py``` → https://huggingface.co/datasets/traopia/FashionDB/blob/main/data_vogue_final.parquet <br/>
 Create the table about fashion desingers<br/>
@@ -43,15 +43,10 @@ Extract FashionCLIP embeddings from the images of collections<br/>
 ```extract_embeddings_images/extract_clip_visual.py``` → https://huggingface.co/datasets/traopia/FashionDB/blob/main/fashion_clip.npy, together with corresponding image URLs https://huggingface.co/datasets/traopia/FashionDB/blob/main/image_urls.npy  <br/>
 
 
-4. Uploading to wikibase, host of FashionDB
+## 4. Uploading to wikibase, host of FashionDB
 Populate with the ontology and properties<br/>
 ```populate_ontology_fashionDB.ipynb``` <br/>
 Populate with structured data. Based on fashion houses and fashion designers extracted information.<br/>
 ```populate_fashionDB.py``` <br/>
 Populate with fashion collections<br/>
 ```populate_wikifashion_fashion_collections.py``` <br/>
-
-Refine fashion sdesigner assignment to collections based on FashionDB informations. <br>
-
-
-
