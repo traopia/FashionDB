@@ -21,8 +21,8 @@ Scraped FMD for information (textual and structured) about designers and fashion
 ```scrapers/scrape_designers_fmd.py``` → data/scraped_data/designer_data_fmd.json <br/>
 Scraped BOF for information (textual and structured) about designers. <br/>
 ```scrapers/scrape_BOF_designers_bio.py``` → data/all_designer_data_BOF.json <br/>
-Get all entities of type fashion house, and with occupation fashion designer from Wikidata. 
-```scrapers/sparql_query_wikidata.py``` → data/names/fashion_designers_wikidata.csv, data/names/fashion_houses_wikidata.csv
+Get all entities of type fashion house, and with occupation fashion designer from Wikidata. <br/>
+```scrapers/sparql_query_wikidata.py``` → data/names/fashion_designers_wikidata.csv, data/names/fashion_houses_wikidata.csv <br/>
 
 
 ## 2. Extracting structured information from scraped texts, data cleaning and preparation <br/>
