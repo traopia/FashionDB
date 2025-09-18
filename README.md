@@ -1,4 +1,4 @@
-This repository stores the source code for the creation of FashionDB: a structured dataset about the recent history of fashion.<br/>
+This repository stores the source code for the creation of FashionDB: a structured dataset about the recent history of fashion. The dataset is published on Hugging Face as tables [FashionDB](https://huggingface.co/datasets/traopia/FashionDB), and is also published as an User Interface on a Wikibase instance [FashionDB Wikibase](https://fashionwiki.wikibase.cloud/wiki/Main_Page). It is also possible to interact with the Database through multimodal queries using [High Fashion Explorer](https://huggingface.co/spaces/traopia/Ask-FashionDB) which is hosted on an HuggingFace Space. <br/>
 ![alt text](img/fashion_DB_pipeline.jpg)
 
 The data was scraped in October 2024.<br/>
