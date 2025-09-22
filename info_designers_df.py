@@ -97,4 +97,27 @@ df_info = df_info[["designer_name","place_of_birth","year_birth","education", "n
 
 designer_info_df = pd.merge(df_info,bio_designers,  how="outer")
 
+import pandas as pd
+from geopy.geocoders import Nominatim
+from functools import partial
+
+# Initialize geolocator
+geolocator = Nominatim(user_agent="nationality_inference")
+
+
+def infer_nationality(place_of_birth):
+    try:
+        geocode = partial(geolocator.geocode, language="en")
+        country = geocode(place_of_birth.strip()).address.split(",")[-1].strip()
+        return country
+    except Exception as e:
+        print(f"Error geocoding {place_of_birth}: {e}")
+        return None
+
+designer_info_df['nationality'] = designer_info_df.apply(
+    lambda row: infer_nationality(row['place_of_birth']) if pd.isna(row['nationality']) else row['nationality'],
+    axis=1
+)
+
+
 designer_info_df.to_parquet("data/final_info_designers.parquet")

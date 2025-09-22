@@ -522,6 +522,163 @@ if __name__ == "__main__":
     df["designer_name"] = df["designer_name"].apply(deduplicate_and_split)
     df= df[df["designer_name"].apply(lambda x: len(x) !=0)]
     #df = df.drop(columns=[col for col in ["designer_names","ner_person_names"] if col in df.columns])
+
+
+
+    import re
+    import pandas as pd
+    from unidecode import unidecode
+    from rapidfuzz import fuzz
+
+    def normalize_name(name: str) -> str:
+        if pd.isna(name):
+            return ""
+        s = str(name)
+        s = unidecode(s)                    # remove accents
+        s = s.lower()
+        s = s.replace("&", " and ")
+        s = re.sub(r"['`´’]", "", s)       # drop apostrophes
+        s = re.sub(r"[^a-z0-9\s]", " ", s) # remove other punctuation
+        s = re.sub(r"\bthe\b", " ", s)     # drop leading article
+        s = re.sub(r"\s+", " ", s).strip()
+        return s
+
+    def build_clusters(names, threshold=96):
+        """
+        Cluster names by token_set_ratio >= threshold.
+        Uses a simple union-find to avoid extra dependencies.
+        """
+        names = list(names)
+        parent = list(range(len(names)))
+
+        def find(x):
+            while parent[x] != x:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        def union(a, b):
+            ra, rb = find(a), find(b)
+            if ra != rb:
+                parent[rb] = ra
+
+        # pairwise compare only when first letter matches to prune
+        by_initial = {}
+        for i, n in enumerate(names):
+            if not n:
+                continue
+            key = n[0]
+            by_initial.setdefault(key, []).append(i)
+
+        for bucket in by_initial.values():
+            for i in range(len(bucket)):
+                for j in range(i+1, len(bucket)):
+                    a, b = bucket[i], bucket[j]
+                    score = fuzz.token_set_ratio(names[a], names[b])
+                    if score >= threshold:
+                        union(a, b)
+
+        # collect clusters
+        clusters = {}
+        for i, n in enumerate(names):
+            r = find(i)
+            clusters.setdefault(r, []).append(i)
+
+        # choose canonical per cluster: longest original string (more informative)
+        idx_to_canonical = {}
+        for root, idxs in clusters.items():
+            # Prefer the string with most tokens, then length
+            candidates = sorted(
+                [names[i] for i in idxs],
+                key=lambda x: (len(x.split()), len(x)),
+                reverse=True
+            )
+            canonical = candidates[0]
+            for i in idxs:
+                idx_to_canonical[i] = canonical
+
+        name_to_canonical = {names[i]: idx_to_canonical[i] for i in range(len(names))}
+        return name_to_canonical
+
+    def canonicalize_designer_names(df: pd.DataFrame, col: str = "designer_name",
+                                    fuzzy_threshold: int = 96,
+                                    manual_overrides: dict | None = None) -> pd.DataFrame:
+        """
+        Returns a copy with a new column '<col>_canonical' where obvious variants are merged.
+        manual_overrides lets you force mappings: {"demna": "demna gvasalia"} (case-insensitive ok).
+        """
+        out = df.copy()
+        out["_normalized_name"] = out[col].map(normalize_name)
+
+        unique_norm = pd.Index(out["_normalized_name"].unique())
+        # Optional manual overrides on normalized space
+        overrides_norm = {}
+        if manual_overrides:
+            for k, v in manual_overrides.items():
+                overrides_norm[normalize_name(k)] = normalize_name(v)
+
+        # Initial canonical map: identity
+        norm_to_canonical = {n: n for n in unique_norm}
+
+        # Apply manual overrides first
+        for n in unique_norm:
+            if n in overrides_norm:
+                norm_to_canonical[n] = overrides_norm[n]
+
+        # Fuzzy cluster remaining ones (that aren't manually overridden)
+        remaining = sorted({n for n in unique_norm if norm_to_canonical[n] == n and n})
+        if remaining:
+            clustered_map = build_clusters(remaining, threshold=fuzzy_threshold)
+            # Map through any transitive canonical produced by clustering
+            for n in remaining:
+                c = clustered_map.get(n, n)
+                # If canonical has an override, use that
+                c = overrides_norm.get(c, c)
+                norm_to_canonical[n] = c
+
+        # Map normalized canonical back to a readable (best) representative:
+        # pick the most informative original string that normalizes to that canonical
+        canonical_norms = set(norm_to_canonical.values())
+        norm_to_best_original = {}
+        for cn in canonical_norms:
+            originals = out.loc[out["_normalized_name"].isin([n for n, c in norm_to_canonical.items() if c == cn]), col].astype(str)
+            if not len(originals):
+                norm_to_best_original[cn] = cn
+            else:
+                norm_to_best_original[cn] = sorted(
+                    originals.unique(),
+                    key=lambda x: (len(x.split()), len(x)),
+                    reverse=True
+                )[0]
+
+        out[f"{col}"] = out["_normalized_name"].map(lambda n: norm_to_best_original[norm_to_canonical.get(n, n)])
+        return out.drop(columns=["_normalized_name"])
+
+    # EXAMPLE USAGE:
+    # df_url = "https://huggingface.co/datasets/traopia/FashionDB/resolve/main/data_vogue_final.parquet"
+    # df = pd.read_parquet(df_url)
+
+    # Add any forced mappings you care about
+    manual = {
+        "Domenico Dolce and Stefano Gabbana": "Domenico Dolce & Stefano Gabbana",
+        "Domenico Dolce": "Domenico Dolce & Stefano Gabbana",
+        "Demna": "Demna Gvasalia",
+        "Benjamin Kirchhoff and Edward Meadham": "Benjamin Kirchhoff & Edward Meadham",
+        "Edward Meadham & Benjamin Kirchhoff": "Benjamin Kirchhoff & Edward Meadham",
+        "Benjamin Kirchhoff": "Benjamin Kirchhoff & Edward Meadham",
+        "Chloé And Parris Gordon":"Parris Gordon",
+        "Christophe Lemaire & Sarah-Linh Tran": "Christophe Lemaire",
+        "Halston": "Roy Halston Frowick",
+        "Steven Cox and Daniel Silver": "Steven Cox & Daniel Silver", 
+        "Valentino": "Valentino Garavani",
+        "Veronica Swanson Beard":"Veronica Swanson Beard & Veronica Miele Beard",
+        "Veronica Miele Beard": "Veronica Swanson Beard & Veronica Miele Beard",
+
+
+
+    }
+
+    df = canonicalize_designer_names(df, col="designer_name", fuzzy_threshold=96, manual_overrides=manual)
     df.to_parquet("data/vogue_data_cd.parquet")
 
     df_exp = df.explode("designer_name")
