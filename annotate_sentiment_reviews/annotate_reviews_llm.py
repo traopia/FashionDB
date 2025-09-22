@@ -2,8 +2,8 @@ import json
 import pandas as pd
 import openai
 import json 
-
-client = openai.OpenAI(api_key="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")
+openai_api_key = []
+client = openai.OpenAI(api_key=openai_api_key)
 
 def annotate_with_llm(text):
     prompt = f"""
