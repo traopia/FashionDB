@@ -9,7 +9,7 @@ import os
 from annotate_reviews_llm import remove_named_entities
 
 
-annotated_path = "Data/llm_annotated_reviews_sample.csv"
+annotated_path = "data/annotate_reviews/llm_annotated_reviews_sample.csv"
 
 
 
