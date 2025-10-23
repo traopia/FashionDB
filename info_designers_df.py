@@ -119,5 +119,8 @@ designer_info_df['nationality'] = designer_info_df.apply(
     axis=1
 )
 
+gender = pd.read_csv("data/scraped_data/gender.csv").rename(columns={"creative_director":"designer_name"})
+designer_info_df = designer_info_df.merge(gender)
+
 
 designer_info_df.to_parquet("data/final_info_designers.parquet")
