@@ -7,13 +7,17 @@ import re
 
 endpoint_url = "https://query.wikidata.org/sparql"
 
-query_education = """SELECT ?schoolLabel WHERE {
+query_education = """SELECT ?schoolLabel ?locationSchoolLabel ?countrySchoolLabel WHERE {
   ?fashionDesigner wdt:P106 wd:Q3501317. # Occupation fashion designer
 
   # Educated at
   OPTIONAL { 
     ?fashionDesigner p:P69 ?educationStatement.
     ?educationStatement ps:P69 ?school. # Educated at institution
+    ?school p:P276 ?locationStatement.
+    ?locationStatement ps:P276 ?locationSchool.
+    ?school p:P17 ?countryStatement.
+    ?countryStatement ps:P17 ?countrySchool.
 
   }
 
@@ -21,6 +25,8 @@ query_education = """SELECT ?schoolLabel WHERE {
   SERVICE wikibase:label { 
     bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en".
     ?school rdfs:label ?schoolLabel.
+    ?locationSchool rdfs:label ?locationSchoolLabel.
+    ?countrySchool rdfs:label ?countrySchoolLabel.
   }
 }"""
 
@@ -86,19 +92,19 @@ def get_results_to_df( query, selected_list = []):
 
 
 def get_education_designers_wikidata(output_file):
-    df_education_designers = get_results_to_df(endpoint_url, query_education)
+    df_education_designers = get_results_to_df(query_education)
     df_education_designers.to_csv(output_file, index=False)
     return df_education_designers
 
 def get_fashion_designers_wikidata(output_file):
-    df_fashion_designers = get_results_to_df(endpoint_url, query_fashion_designers)
+    df_fashion_designers = get_results_to_df(query_fashion_designers)
     df_fashion_designers.to_csv(output_file, index=False)
     return df_fashion_designers
 
 
 
 def get_fashion_houses_wikidata(output_file):
-    df_fashion_houses = get_results_to_df(endpoint_url, query_fashion_houses)
+    df_fashion_houses = get_results_to_df(query_fashion_houses)
     df_fashion_houses.to_csv(output_file, index=False)
     return df_fashion_houses
 
@@ -114,13 +120,14 @@ def get_wikidata_info_based_on_id(wikidata_ids):
 
     ids_values = " ".join(f"{qid}" for qid in wikidata_ids)
     query = f"""
-    SELECT ?person ?personLabel ?dateOfBirth ?placeOfBirthLabel ?educationLabel ?countryLabel
+    SELECT ?person ?personLabel ?dateOfBirth ?placeOfBirthLabel ?educationLabel ?countryLabel ?education_countryLabel
     WHERE {{
       VALUES ?person {{ {ids_values} }}
       OPTIONAL {{ ?person wdt:P569 ?dateOfBirth. }}
       OPTIONAL {{ ?person wdt:P19 ?placeOfBirth. }}
       OPTIONAL {{ ?person wdt:P69 ?education. }}
       OPTIONAL {{ ?person wdt:P27 ?country. }}
+      OPTIONAL {{ ?education wdt:P276 ?education_country. }}
       SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
     }}
     """
@@ -128,7 +135,7 @@ def get_wikidata_info_based_on_id(wikidata_ids):
     df = get_results_to_df(query)
     if not df.empty:
         df = df.groupby(
-            ["person","dateOfBirth","personLabel","placeOfBirthLabel", "countryLabel"],
+            ["person","dateOfBirth","personLabel","placeOfBirthLabel", "countryLabel", "education_countryLabel"],
             dropna=False
         )["educationLabel"].apply(lambda x: list({e for e in x if e})).reset_index()
 
@@ -138,7 +145,7 @@ def get_wikidata_info_based_on_id(wikidata_ids):
 
 if __name__ == "__main__":
     get_education_designers_wikidata("data/names/school_names_designers_wikidata.csv")
-    get_fashion_designers_wikidata("data/names/fashion_designers_wikidata.csv")
-    get_fashion_houses_wikidata("data/names/fashion_houses_wikidata.csv")
+    # get_fashion_designers_wikidata("data/names/fashion_designers_wikidata.csv")
+    # get_fashion_houses_wikidata("data/names/fashion_houses_wikidata.csv")
     # wikidata_ids = pd.read_csv("data/names/fashion_designers_wikidata.csv").fashionDesigner
     # df = get_wikidata_info_based_on_id(wikidata_ids)

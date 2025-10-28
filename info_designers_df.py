@@ -5,6 +5,11 @@ from extract_info.assign_designer_to_collection import extract_birth_year
 from extract_info.sparql_query_wikidata import get_wikidata_info_based_on_id
 import re
 import numpy as np
+import pandas as pd
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
+import time
+from functools import partial
 
 def extract_names_from_KG(kg_string, properties):
     all_names = []
@@ -97,27 +102,41 @@ df_info = df_info[["designer_name","place_of_birth","year_birth","education", "n
 
 designer_info_df = pd.merge(df_info,bio_designers,  how="outer")
 
-import pandas as pd
-from geopy.geocoders import Nominatim
-from functools import partial
-
-# Initialize geolocator
-geolocator = Nominatim(user_agent="nationality_inference")
 
 
-def infer_nationality(place_of_birth):
-    try:
-        geocode = partial(geolocator.geocode, language="en")
-        country = geocode(place_of_birth.strip()).address.split(",")[-1].strip()
-        return country
-    except Exception as e:
-        print(f"Error geocoding {place_of_birth}: {e}")
+# Initialize geolocator with proper User-Agent and longer timeout
+geolocator = Nominatim(user_agent="FashionDB/1.0 (contact: your-email@example.com)", timeout=10)
+
+
+def infer_nationality(place_of_birth, max_retries=3):
+    if not isinstance(place_of_birth, str) or not place_of_birth.strip():
         return None
+    geocode = partial(geolocator.geocode, language="en")
+    last_err = None
+    for attempt in range(max_retries):
+        try:
+            loc = geocode(place_of_birth.strip())
+            if loc and loc.address:
+                return loc.address.split(",")[-1].strip()
+            return None
+        except (GeocoderTimedOut, GeocoderUnavailable) as e:
+            last_err = e
+            time.sleep(1.5 * (attempt + 1))
+        except Exception as e:
+            last_err = e
+            break
+    print(f"Error geocoding {place_of_birth}: {last_err}")
+    return None
 
+designer_info_df = pd.read_parquet("data/final_info_designers.parquet")
 designer_info_df['nationality'] = designer_info_df.apply(
     lambda row: infer_nationality(row['place_of_birth']) if pd.isna(row['nationality']) else row['nationality'],
     axis=1
 )
 
+df_school = pd.read_csv("data/names/school_names_designers_wikidata.csv")
+df_school = df_school.dropna()
+df_school = df_school.rename(columns= {"schoolLabel":"education"})
+designer_info_df = designer_info_df.merge(df_school, how = "left")
 
 designer_info_df.to_parquet("data/final_info_designers.parquet")
