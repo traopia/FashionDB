@@ -134,9 +134,15 @@ designer_info_df['nationality'] = designer_info_df.apply(
     axis=1
 )
 
+<<<<<<< HEAD
 df_school = pd.read_csv("data/names/school_names_designers_wikidata.csv")
 df_school = df_school.dropna()
 df_school = df_school.rename(columns= {"schoolLabel":"education"})
 designer_info_df = designer_info_df.merge(df_school, how = "left")
+=======
+gender = pd.read_csv("data/scraped_data/gender.csv").rename(columns={"creative_director":"designer_name"})
+designer_info_df = designer_info_df.merge(gender)
+
+>>>>>>> f58455d52d94c4d1c8c2a41ecb232d4d037d5e9f
 
 designer_info_df.to_parquet("data/final_info_designers.parquet")

@@ -77,7 +77,7 @@ def main():
     annotations_df = sample['clean_description'].apply(annotate_with_llm)
     sample = pd.concat([sample, annotations_df], axis=1)
 
-    sample.to_csv("Data/llm_annotated_reviews_sample.csv", index=False)
+    sample.to_csv("data/annotate_reviews/llm_annotated_reviews_sample.csv", index=False)
 
 if __name__ == "__main__":
     main()
