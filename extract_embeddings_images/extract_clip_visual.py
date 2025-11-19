@@ -218,7 +218,7 @@ def process_image_parquet_replaced(parquet_path, segment=False, batch_size=BATCH
         raise ValueError("Parquet file must have 'image_urls_sample' column")
     
     processed_urls = load_existing_urls_npy(URLS_PATH)
-    remaining = set(df["image_urls_sample"].explode()) - processed_urls
+    remaining = set(processed_urls)- replaced_urls
     print("to be processed", len(remaining))
     print("already done", len(processed_urls))
     new_embeddings, new_urls = [], []
