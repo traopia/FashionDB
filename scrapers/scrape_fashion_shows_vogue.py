@@ -73,6 +73,25 @@ def modify_image_url(original_url):
     # Replace the width parameter in the URL for a higher-resolution image
     return original_url.replace("w_360", "w_1280")
 
+def extract_creative_director(soup):
+    """
+    Extracts the creative director from the Vogue show page.
+    Typically appears as 'By Alessandro Michele' or similar.
+    """
+    try:
+        # Look for a tag that contains "By ..."
+        byline_tag = soup.find(string=re.compile(r'By\s+[A-Z][a-z]+'))
+        if byline_tag:
+            match = re.search(r'By\s+(.*)', byline_tag.strip())
+            if match:
+                creative_director = match.group(1).strip()
+                # Remove trailing punctuation if present
+                creative_director = re.sub(r'[.,;]+$', '', creative_director)
+                return creative_director
+    except Exception as e:
+        print(f"Error extracting creative director: {e}")
+    return None
+
 def scrape_show_details(designer, show, all_urls=False):
     # Format designer and show names to match Vogue URL conventions
     show = unidecode(show.replace(' ', '-').lower())
@@ -86,7 +105,7 @@ def scrape_show_details(designer, show, all_urls=False):
     r = requests.get(url)
     if r.status_code != 200:
         print(f"Failed to retrieve {url}")
-        return designer, show, None, None, None, None
+        return designer, show, None, None, None, None, None
 
     # Parse the page content
     soup = BeautifulSoup(r.content, 'html.parser')
@@ -107,6 +126,9 @@ def scrape_show_details(designer, show, all_urls=False):
         print(f"Error extracting editor for {url}: {e}")
         editor = None
 
+    # Extract the creative director
+    creative_director = extract_creative_director(soup)
+
     # Extract the publish date
     try:
         date_span = soup.find('time', class_='ContentHeaderPublishDate-eIBicG')
@@ -117,11 +139,9 @@ def scrape_show_details(designer, show, all_urls=False):
 
     # Locate and parse JSON for image URLs
     try:
-        # Locate the JSON data within the script tag
         script_tag = soup.find("script", string=re.compile(r'"runwayShowGalleries":'))
         script_content = script_tag.string if script_tag else None
 
-        # Parse JSON data if found
         if script_content:
             json_data_match = re.search(r'"runwayShowGalleries":\s*({.*?})\s*;', script_content, re.DOTALL)
             if json_data_match:
@@ -129,7 +149,6 @@ def scrape_show_details(designer, show, all_urls=False):
                 json_decoder = json.JSONDecoder()
                 json_data, _ = json_decoder.raw_decode(json_data_str)
 
-                # Extract image URLs
                 galleries = json_data["galleries"]
                 if all_urls:
                     image_urls = [modify_image_url(item["image"]["sources"]["sm"]["url"])
@@ -146,8 +165,7 @@ def scrape_show_details(designer, show, all_urls=False):
         print(f"Error extracting image URLs for {url}: {e}")
         image_urls = None
 
-    return designer, show, description, editor, publish_date, image_urls
-
+    return designer, show, description, editor, publish_date, image_urls, creative_director
 
 
 

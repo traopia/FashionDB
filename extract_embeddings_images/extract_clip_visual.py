@@ -67,6 +67,41 @@ def segment_clothing_white(img, clothes=["Background"]):
 
 
 
+import re
+
+pattern = re.compile(r"(beauty|detail)", re.IGNORECASE)
+
+def clean_row(row):
+    original = row["image_urls_sample"]
+
+    # Clean pool: valid URLs from image_urls
+    clean_pool = [
+        u for u in row["image_urls"]
+        if isinstance(u, str) and not pattern.search(u)
+    ]
+
+    # If no clean option exists, return unchanged
+    if not clean_pool:
+        return original
+
+    # Index in pool for deterministic assignment
+    pool_idx = 0
+    cleaned_list = []
+
+    for url in original:
+        if isinstance(url, str) and pattern.search(url):
+            # Bad → replace with next clean URL
+            if pool_idx < len(clean_pool):
+                cleaned_list.append(clean_pool[pool_idx])
+                pool_idx += 1
+            else:
+                # not enough clean URLs → fallback to original bad one
+                cleaned_list.append(url)
+        else:
+            # Good → keep
+            cleaned_list.append(url)
+
+    return cleaned_list
 
 def download_image(image_url):
     """Download an image from a URL, save it locally with the URL as the filename, and return a PIL image."""
@@ -81,7 +116,8 @@ def download_image(image_url):
         
         # Save the image locally with the URL as the filename (sanitized)
         sanitized_filename = image_url.replace("://", "-").replace("/", "_")
-
+        if len(sanitized_filename)> 255:
+            return None
         image.save(f'/Users/{device_dir}/Library/CloudStorage/OneDrive-UvA/fashion_images/images_all/'+sanitized_filename, format="JPEG")
         print(f"✅ Image saved as {sanitized_filename}")
         
@@ -89,10 +125,14 @@ def download_image(image_url):
     except requests.exceptions.RequestException as e:
         print(f"⚠️ Failed to download {image_url}: {e}")
         return None
-    
+
+
 def get_image_locally(image_url):
     """Retrieve an image from local storage based on its sanitized filename."""
     sanitized_filename = image_url.replace("://", "-").replace("/", "_")
+    if len(sanitized_filename) > 255:
+        return None
+
     local_path = f'/Users/{device_dir}/Library/CloudStorage/OneDrive-UvA/fashion_images/images_all/{sanitized_filename}'
     
     if os.path.exists(local_path):
@@ -104,9 +144,28 @@ def get_image_locally(image_url):
         except Exception as e:
             print(f"⚠️ Failed to load image from {local_path}: {e}")
             return None
+    if os.path.exists(f'/Users/{device_dir}/Library/CloudStorage/OneDrive-UvA/fashion_images/{sanitized_filename}'):
+        try:
+            Image.MAX_IMAGE_PIXELS = 500_000_000
+            image = Image.open(local_path).convert("RGB")
+            print(f"✅ Image loaded from fashion_image")
+            return image
+        except Exception as e:
+            print(f"⚠️ Failed to load image from {local_path}: {e}")
+            return None
+    if os.path.exists(f'/Users/{device_dir}/Library/CloudStorage/OneDrive-UvA/fashion_images/images/{sanitized_filename}'):
+        try:
+            Image.MAX_IMAGE_PIXELS = 500_000_000
+            image = Image.open(local_path).convert("RGB")
+            print(f"✅ Image loaded from images")
+            return image
+        except Exception as e:
+            print(f"⚠️ Failed to load image from {local_path}: {e}")
+            return None
     else:
         print(f"⚠️ Image not found locally at {local_path}")
         return None
+
 
 
 def encode_image(image):
@@ -126,6 +185,76 @@ def load_existing_urls_npy(urls_path=URLS_PATH):
     urls_array = np.load(urls_path, allow_pickle=True)
     return set(urls_array)
 
+
+def process_image_parquet_replaced(parquet_path, segment=False, batch_size=BATCH_SIZE, embedding_dim=512):
+    df = pd.read_parquet("https://huggingface.co/datasets/traopia/FashionDB/resolve/main/data_vogue_final.parquet")
+    df = df[df["category"]=="ready-to-wear"]
+    df["image_urls_sample"] = df.apply(
+    lambda row: row["image_urls_sample"] + [row["cover_image_url"]],
+    axis=1)
+    bad_urls = (
+    df["image_urls_sample"]
+    .explode()
+    .dropna()
+    .loc[lambda s: s.str.contains(r"(beauty|detail)", case=False, na=False)])
+    print("total to replace",len(bad_urls))
+
+    df["cleaned_image_urls_sample"] = df.apply(clean_row, axis=1)
+
+    substituted_urls = [
+    (old, new)
+    for old, new in zip(df["image_urls_sample"], df["cleaned_image_urls_sample"])
+    if list(old) != list(new)]
+
+    replaced_urls = [
+        url
+        for old_list, new_list in substituted_urls
+        for url in list(new_list)
+        if url not in list(old_list)
+    ]
+    df = df.drop(columns=["image_urls_sample"])
+    df = df.rename(columns={"cleaned_image_urls_sample":"image_urls_sample"})
+    if "image_urls_sample" not in df.columns:
+        raise ValueError("Parquet file must have 'image_urls_sample' column")
+    
+    processed_urls = load_existing_urls_npy(URLS_PATH)
+    remaining = set(df["image_urls_sample"].explode()) - processed_urls
+    print("to be processed", len(remaining))
+    print("already done", len(processed_urls))
+    new_embeddings, new_urls = [], []
+
+    for img_url in replaced_urls:
+        if img_url in processed_urls:
+            #print(f"✅ Skipping {img_url} (already processed)")
+            continue
+
+        # Download and optionally segment
+        image = download_image(img_url)
+        if image is None:
+            continue
+        if segment:
+            image = segment_clothing_white(image)
+
+        # Compute embedding
+        embedding = encode_image(image)
+        embedding = embedding / torch.linalg.norm(torch.tensor(embedding), ord=2, dim=-1, keepdim=True)
+        embedding = embedding.numpy().astype(np.float32).flatten()
+
+        new_embeddings.append(embedding)
+        new_urls.append(img_url)
+        processed_urls.add(img_url)
+
+        # Flush batch
+        if len(new_embeddings) >= batch_size:
+            flush_embeddings(new_embeddings, new_urls)
+            new_embeddings, new_urls = [], []
+
+    # Flush remaining
+    if new_embeddings:
+        flush_embeddings(new_embeddings, new_urls)
+
+    print("✅ Finished processing Parquet file.")
+
 def process_images_parquet(parquet_path, segment=False, batch_size=BATCH_SIZE, embedding_dim=512):
     """
     Process images from a Parquet file and save embeddings/URLs incrementally.
@@ -136,13 +265,13 @@ def process_images_parquet(parquet_path, segment=False, batch_size=BATCH_SIZE, e
         batch_size: number of images before flushing to disk
         embedding_dim: dimension of FashionCLIP embeddings
     """
-    df = pd.read_parquet(parquet_path)
-    if "image_urls_sample" not in df.columns:
-        raise ValueError("Parquet file must have 'image_urls_sample' column")
-    
-    processed_urls = load_existing_urls_npy(URLS_PATH)
-    new_embeddings, new_urls = [], []
+    df = pd.read_parquet("https://huggingface.co/datasets/traopia/FashionDB/resolve/main/data_vogue_final.parquet")
+    df = df[df["category"]=="ready-to-wear"]
+    df["image_urls_sample"] = df.apply(
+    lambda row: row["image_urls_sample"] + [row["cover_image_url"]],
+    axis=1)
 
+    processed_urls = load_existing_urls_npy(URLS_PATH)
     for idx, row in df.iterrows():
         image_urls = row["image_urls_sample"]
         if isinstance(image_urls, str):
@@ -150,7 +279,7 @@ def process_images_parquet(parquet_path, segment=False, batch_size=BATCH_SIZE, e
 
         for img_url in image_urls:
             if img_url in processed_urls:
-                print(f"✅ Skipping {img_url} (already processed)")
+                #print(f"✅ Skipping {img_url} (already processed)")
                 continue
 
             # Download and optionally segment
