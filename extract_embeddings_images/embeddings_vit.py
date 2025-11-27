@@ -69,6 +69,28 @@ def encode_image(image):
     return embedding
 
 
+EMBEDDINGS_PATH_vit = "data/embeddings/vit_embeddings_segmented.npy"   # change name if desired
+URLS_PATH_vit= "data/embeddings/vit_image_urls_segmented.npy"
+
+
+
+def encode_image_vit(image):
+    """Encode an image with timm ResNet or ViT backbone."""
+    model_name = "vit_base_patch16_224"
+
+    model = timm.create_model(model_name, pretrained=True, num_classes=0, global_pool="avg").to(device)
+    model.eval()
+    transform = T.Compose([
+    T.Resize((224, 224)),
+    T.ToTensor(),
+    T.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
+    image_tensor = transform(image).unsqueeze(0).to(device)
+    with torch.no_grad():
+        features = model(image_tensor)
+    embedding = features.cpu().numpy().flatten().astype(np.float32)
+    embedding /= np.linalg.norm(embedding) + 1e-8  # normalize
+    return embedding
+
 # -----------------------------
 # Incremental save logic
 # -----------------------------
@@ -140,49 +162,148 @@ def process_images_parquet(parquet_path, batch_size=BATCH_SIZE):
 
     print("✅ Finished processing.")
 
-from extract_clip_visual import clean_row, load_existing_urls_npy
 
-def process_image_parquet_replaced(parquet_path, segment=False, batch_size=BATCH_SIZE, embedding_dim=512):
-    df = pd.read_parquet("https://huggingface.co/datasets/traopia/FashionDB/resolve/main/data_vogue_final.parquet")
-    df = df[df["category"]=="ready-to-wear"]
-    df["image_urls_sample"] = df.apply(
-    lambda row: row["image_urls_sample"] + [row["cover_image_url"]],
-    axis=1)
-    bad_urls = (
-    df["image_urls_sample"]
-    .explode()
-    .dropna()
-    .loc[lambda s: s.str.contains(r"(beauty|detail)", case=False, na=False)])
-    print("total to replace",len(bad_urls))
 
-    df["cleaned_image_urls_sample"] = df.apply(clean_row, axis=1)
 
-    substituted_urls = [
-    (old, new)
-    for old, new in zip(df["image_urls_sample"], df["cleaned_image_urls_sample"])
-    if list(old) != list(new)]
+def process_images_parquet(parquet_path, batch_size=BATCH_SIZE):
+    df = pd.read_parquet(parquet_path)
 
-    replaced_urls = [
-        url
-        for old_list, new_list in substituted_urls
-        for url in list(new_list)
-        if url not in list(old_list)
-    ]
-    df = df.drop(columns=["image_urls_sample"])
-    df = df.rename(columns={"cleaned_image_urls_sample":"image_urls_sample"})
-    if "image_urls_sample" not in df.columns:
-        raise ValueError("Parquet file must have 'image_urls_sample' column")
-    
-    processed_urls = load_existing_urls_npy(URLS_PATH)
-    remaining = set(df["image_urls_sample"].explode()) - processed_urls
-    print("to be processed", len(remaining))
-    print("already done", len(processed_urls))
+
+    if "image_urls_sample_fixed" not in df.columns:
+        raise ValueError("Parquet must have 'image_urls_sample' column")
+
+    if os.path.exists(URLS_PATH):
+        processed = set(np.load(URLS_PATH, allow_pickle=True))
+        print("processed already", len(processed))
+    else:
+        processed = set()
+
     new_embeddings, new_urls = [], []
 
-    for img_url in replaced_urls:
-        if img_url in processed_urls:
-            #print(f"✅ Skipping {img_url} (already processed)")
-            continue
+    for _, row in df.iterrows():
+        urls = row["image_urls_sample_fixed"]
+        if isinstance(urls, str):
+            urls = [urls]
+
+        for url in urls:
+            if url in processed:
+                continue
+
+            img = download_image(url)
+            if img is None:
+                continue
+            img = segment_clothing_white(img)
+            if img is None:
+                continue
+
+            emb = encode_image(img)
+            new_embeddings.append(emb)
+            new_urls.append(url)
+            processed.add(url)
+
+            if len(new_embeddings) >= batch_size:
+                flush_embeddings(new_embeddings, new_urls)
+                new_embeddings, new_urls = [], []
+
+    if new_embeddings:
+        flush_embeddings(new_embeddings, new_urls)
+
+    print("✅ Finished processing.")
+from extract_clip_visual import clean_row, load_existing_urls_npy
+
+# def process_image_parquet_replaced(parquet_path, segment=False, batch_size=BATCH_SIZE, embedding_dim=512):
+#     df = pd.read_parquet("https://huggingface.co/datasets/traopia/FashionDB/resolve/main/data_vogue_final.parquet")
+#     df = df[df["category"]=="ready-to-wear"]
+#     df["image_urls_sample"] = df.apply(
+#     lambda row: row["image_urls_sample"] + [row["cover_image_url"]],
+#     axis=1)
+#     bad_urls = (
+#     df["image_urls_sample"]
+#     .explode()
+#     .dropna()
+#     .loc[lambda s: s.str.contains(r"(beauty|detail)", case=False, na=False)])
+#     print("total to replace",len(bad_urls))
+
+#     df["cleaned_image_urls_sample"] = df.apply(clean_row, axis=1)
+
+#     substituted_urls = [
+#     (old, new)
+#     for old, new in zip(df["image_urls_sample"], df["cleaned_image_urls_sample"])
+#     if list(old) != list(new)]
+
+#     replaced_urls = [
+#         url
+#         for old_list, new_list in substituted_urls
+#         for url in list(new_list)
+#         if url not in list(old_list)
+#     ]
+#     df = df.drop(columns=["image_urls_sample"])
+#     df = df.rename(columns={"cleaned_image_urls_sample":"image_urls_sample"})
+#     if "image_urls_sample" not in df.columns:
+#         raise ValueError("Parquet file must have 'image_urls_sample' column")
+    
+#     processed_urls = load_existing_urls_npy(URLS_PATH)
+#     remaining = set(df["image_urls_sample"].explode()) - processed_urls
+#     print("to be processed", len(remaining))
+#     print("already done", len(processed_urls))
+#     new_embeddings, new_urls = [], []
+
+#     for img_url in replaced_urls:
+#         if img_url in processed_urls:
+#             #print(f"✅ Skipping {img_url} (already processed)")
+#             continue
+
+#         # Download and optionally segment
+#         image = download_image(img_url)
+#         if image is None:
+#             continue
+#         if segment:
+#             image = segment_clothing_white(image)
+
+#         # Compute embedding
+#         embedding = encode_image(image)
+#         embedding = embedding / torch.linalg.norm(torch.tensor(embedding), ord=2, dim=-1, keepdim=True)
+#         embedding = embedding.numpy().astype(np.float32).flatten()
+
+#         new_embeddings.append(embedding)
+#         new_urls.append(img_url)
+#         processed_urls.add(img_url)
+
+#         # Flush batch
+#         if len(new_embeddings) >= batch_size:
+#             flush_embeddings(new_embeddings, new_urls)
+#             new_embeddings, new_urls = [], []
+
+#     # Flush remaining
+#     if new_embeddings:
+#         flush_embeddings(new_embeddings, new_urls)
+
+#     print("✅ Finished processing Parquet file.")
+
+def process_image_parquet_replaced(parquet_path, segment=True, batch_size=BATCH_SIZE, embedding_dim=512):
+    df = pd.read_parquet("data/data_vogue_final_with_images_sampled.parquet")
+
+    # 1. Collect replacement URLs
+    replaced_urls = {
+        url
+        for sublist in df["replacements"]
+        if isinstance(sublist, list)
+        for url in sublist
+    }
+
+    # 2. Load already processed URLs
+    processed_urls = load_existing_urls_npy(URLS_PATH)
+
+    # 3. Determine which replacement URLs still need processing
+    to_process = replaced_urls - processed_urls
+
+    print("to be processed", len(to_process))
+    print("already done", len(processed_urls))
+
+    new_embeddings, new_urls = [], []
+
+    # 4. Process only unprocessed replacement URLs
+    for img_url in to_process:
 
         # Download and optionally segment
         image = download_image(img_url)
@@ -198,18 +319,18 @@ def process_image_parquet_replaced(parquet_path, segment=False, batch_size=BATCH
 
         new_embeddings.append(embedding)
         new_urls.append(img_url)
-        processed_urls.add(img_url)
+        processed_urls.add(img_url)  # keep tracking in memory
 
         # Flush batch
         if len(new_embeddings) >= batch_size:
             flush_embeddings(new_embeddings, new_urls)
             new_embeddings, new_urls = [], []
 
-    # Flush remaining
+    # Flush leftovers
     if new_embeddings:
         flush_embeddings(new_embeddings, new_urls)
 
-    print("✅ Finished processing Parquet file.")
+    print("✅ Finished processing replacement URLs.")
 
 
 # -----------------------------
@@ -217,7 +338,7 @@ def process_image_parquet_replaced(parquet_path, segment=False, batch_size=BATCH
 # -----------------------------
 def main():
     parquet_path = "data/data_vogue_final.parquet"
-    process_image_parquet_replaced(parquet_path,segment=True)
+    process_images_parquet("data/data_vogue_final_with_images_sampled.parquet")
 
 if __name__ == "__main__":
     main()

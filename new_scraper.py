@@ -277,5 +277,46 @@ def main():
     print(f"   - Output saved to: {OUTPUT_PATH}")
 
 
+def align_sample_with_collection(sample, collection):
+
+
+    sample = list(sample)
+    collection = list(collection)
+
+    # 1. Keep only overlapping URLs
+    new_sample = [url for url in sample if url in collection]
+
+    # 2. Count how many need to be added
+    missing_count = len(sample) - len(new_sample)
+
+    replacements = []  # store newly added URLs
+
+    if missing_count > 0:
+        # URLs in the collection not already in the sample
+        unused = [url for url in collection if url not in new_sample]
+
+        # Take as many as needed
+        replacements = unused[:missing_count]
+
+        # Extend sample
+        new_sample.extend(replacements)
+
+    return new_sample, replacements
+
+def after_scraped_cleaning():
+    df = pd.read_parquet(OUTPUT_PATH)
+
+    df[["image_urls_sample_fixed", "replacements"]] = df.apply(
+        lambda row: pd.Series(
+            align_sample_with_collection(
+                row["image_urls_sample"], 
+                row["image_urls_collection"]
+            )
+        ),
+        axis=1)
+    df.to_parquet("data/data_vogue_final_with_images_sampled.parquet")
+
+    
 if __name__ == "__main__":
     main()
+    after_scraped_cleaning()

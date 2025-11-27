@@ -4,35 +4,22 @@ import requests
 import json
 from io import BytesIO
 from PIL import Image
-from transformers import CLIPProcessor, CLIPModel
-import os
-import pandas as pd
+from transformers import CLIPProcessor, CLIPModel, pipeline
 import os
 import numpy as np
 import torch
 import pandas as pd
+import timm
+import torchvision.transforms as T
 
 
-EMBEDDINGS_PATH = "data/embeddings/fashion_clip.npy"
-URLS_PATH = "data/embeddings/image_urls.npy"
-BATCH_SIZE = 50  # flush every 50 images
+
 
 #set device: Use GPU if availanle, otherwise mps if available otherwise CPU
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+BATCH_SIZE = 50  # flush every 50 images
 
 
-# Load Fashion-CLIP model and processor
-model_name = "patrickjohncyh/fashion-clip"
-#model_name = "openai/clip-vit-base-patch32"
-model = CLIPModel.from_pretrained(model_name).to(device)
-processor = CLIPProcessor.from_pretrained(model_name)
-
-
-from transformers import pipeline
-from PIL import Image
-import numpy as np
-import os
-import torch
 device_dir = os.getcwd().split('/')[2]
 # Initialize segmentation pipeline
 segmenter = pipeline(model="mattmdjaga/segformer_b2_clothes", device = device)
@@ -67,41 +54,41 @@ def segment_clothing_white(img, clothes=["Background"]):
 
 
 
-import re
+# import re
 
-pattern = re.compile(r"(beauty|detail)", re.IGNORECASE)
+# pattern = re.compile(r"(beauty|detail)", re.IGNORECASE)
 
-def clean_row(row):
-    original = row["image_urls_sample"]
+# def clean_row(row):
+#     original = row["image_urls_sample"]
 
-    # Clean pool: valid URLs from image_urls
-    clean_pool = [
-        u for u in row["image_urls"]
-        if isinstance(u, str) and not pattern.search(u)
-    ]
+#     # Clean pool: valid URLs from image_urls
+#     clean_pool = [
+#         u for u in row["image_urls"]
+#         if isinstance(u, str) and not pattern.search(u)
+#     ]
 
-    # If no clean option exists, return unchanged
-    if not clean_pool:
-        return original
+#     # If no clean option exists, return unchanged
+#     if not clean_pool:
+#         return original
 
-    # Index in pool for deterministic assignment
-    pool_idx = 0
-    cleaned_list = []
+#     # Index in pool for deterministic assignment
+#     pool_idx = 0
+#     cleaned_list = []
 
-    for url in original:
-        if isinstance(url, str) and pattern.search(url):
-            # Bad → replace with next clean URL
-            if pool_idx < len(clean_pool):
-                cleaned_list.append(clean_pool[pool_idx])
-                pool_idx += 1
-            else:
-                # not enough clean URLs → fallback to original bad one
-                cleaned_list.append(url)
-        else:
-            # Good → keep
-            cleaned_list.append(url)
+#     for url in original:
+#         if isinstance(url, str) and pattern.search(url):
+#             # Bad → replace with next clean URL
+#             if pool_idx < len(clean_pool):
+#                 cleaned_list.append(clean_pool[pool_idx])
+#                 pool_idx += 1
+#             else:
+#                 # not enough clean URLs → fallback to original bad one
+#                 cleaned_list.append(url)
+#         else:
+#             # Good → keep
+#             cleaned_list.append(url)
 
-    return cleaned_list
+#     return cleaned_list
 
 def download_image(image_url):
     """Download an image from a URL, save it locally with the URL as the filename, and return a PIL image."""
@@ -173,12 +160,30 @@ def encode_image(image):
     inputs = processor(images=image, return_tensors="pt").to(device)
 
     with torch.no_grad():
-        image_features = model.get_image_features(**inputs).cpu().numpy()  # Move to CPU for stability
-    return image_features
+        embedding = model.get_image_features(**inputs).cpu().numpy()  # Move to CPU for stability
+
+    embedding /= torch.linalg.norm(torch.tensor(embedding), ord=2, dim=-1, keepdim=True)
+    embedding = embedding.numpy().astype(np.float32).flatten()
+    return embedding
 
 
 
-def load_existing_urls_npy(urls_path=URLS_PATH):
+
+def encode_image_vit(image):
+    """Encode an image with timm ResNet or ViT backbone."""
+    transform = T.Compose([
+    T.Resize((224, 224)),
+    T.ToTensor(),
+    T.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))])
+    image_tensor = transform(image).unsqueeze(0).to(device)
+    with torch.no_grad():
+        features = model(image_tensor)
+    embedding = features.cpu().numpy().flatten().astype(np.float32)
+    embedding /= np.linalg.norm(embedding) + 1e-8  # normalize
+    return embedding
+
+
+def load_existing_urls_npy(urls_path):
     """Load already processed image URLs from .npy file."""
     if not os.path.exists(urls_path):
         return set()
@@ -186,47 +191,30 @@ def load_existing_urls_npy(urls_path=URLS_PATH):
     return set(urls_array)
 
 
-def process_image_parquet_replaced(parquet_path, segment=False, batch_size=BATCH_SIZE, embedding_dim=512):
-    df = pd.read_parquet("https://huggingface.co/datasets/traopia/FashionDB/resolve/main/data_vogue_final.parquet")
+
+def process_image_parquet_replaced(parquet_path, extractor,segment=True, batch_size=BATCH_SIZE):
+    df = pd.read_parquet("data/data_vogue_final_with_images_sampled.parquet")
     df = df[df["category"]=="ready-to-wear"]
-    df["image_urls_sample"] = df.apply(
-    lambda row: row["image_urls_sample"] + [row["cover_image_url"]],
-    axis=1)
-    bad_urls = (
-    df["image_urls_sample"]
-    .explode()
-    .dropna()
-    .loc[lambda s: s.str.contains(r"(beauty|detail)", case=False, na=False)])
-    print("total to replace",len(bad_urls))
 
-    df["cleaned_image_urls_sample"] = df.apply(clean_row, axis=1)
+    # 1. Collect replacement URLs
+    replaced_urls = set([
+    url
+    for sublist in df["replacements"]
+    for url in sublist])
 
-    substituted_urls = [
-    (old, new)
-    for old, new in zip(df["image_urls_sample"], df["cleaned_image_urls_sample"])
-    if list(old) != list(new)]
-
-    replaced_urls = [
-        url
-        for old_list, new_list in substituted_urls
-        for url in list(new_list)
-        if url not in list(old_list)
-    ]
-    df = df.drop(columns=["image_urls_sample"])
-    df = df.rename(columns={"cleaned_image_urls_sample":"image_urls_sample"})
-    if "image_urls_sample" not in df.columns:
-        raise ValueError("Parquet file must have 'image_urls_sample' column")
-    
+    # 2. Load already processed URLs
     processed_urls = load_existing_urls_npy(URLS_PATH)
-    remaining = set(processed_urls)- replaced_urls
-    print("to be processed", len(remaining))
+
+    # 3. Determine which replacement URLs still need processing
+    to_process = replaced_urls - processed_urls
+
+    print("to be processed", len(to_process))
     print("already done", len(processed_urls))
+
     new_embeddings, new_urls = [], []
 
-    for img_url in replaced_urls:
-        if img_url in processed_urls:
-            #print(f"✅ Skipping {img_url} (already processed)")
-            continue
+    # 4. Process only unprocessed replacement URLs
+    for img_url in to_process:
 
         # Download and optionally segment
         image = download_image(img_url)
@@ -236,26 +224,29 @@ def process_image_parquet_replaced(parquet_path, segment=False, batch_size=BATCH
             image = segment_clothing_white(image)
 
         # Compute embedding
-        embedding = encode_image(image)
-        embedding = embedding / torch.linalg.norm(torch.tensor(embedding), ord=2, dim=-1, keepdim=True)
-        embedding = embedding.numpy().astype(np.float32).flatten()
+        if extractor =="fashion_clip":
+            embedding = encode_image(image)
+            # embedding = embedding / torch.linalg.norm(torch.tensor(embedding), ord=2, dim=-1, keepdim=True)
+            # embedding = embedding.numpy().astype(np.float32).flatten()
+        if extractor == "vit":
+            embedding = encode_image_vit(image)
 
         new_embeddings.append(embedding)
         new_urls.append(img_url)
-        processed_urls.add(img_url)
+        processed_urls.add(img_url)  # keep tracking in memory
 
         # Flush batch
         if len(new_embeddings) >= batch_size:
             flush_embeddings(new_embeddings, new_urls)
             new_embeddings, new_urls = [], []
 
-    # Flush remaining
+    # Flush leftovers
     if new_embeddings:
         flush_embeddings(new_embeddings, new_urls)
 
-    print("✅ Finished processing Parquet file.")
+    print("✅ Finished processing replacement URLs.")
 
-def process_images_parquet(parquet_path, segment=False, batch_size=BATCH_SIZE, embedding_dim=512):
+def process_images_parquet(parquet_path, segment=False, batch_size=BATCH_SIZE):
     """
     Process images from a Parquet file and save embeddings/URLs incrementally.
     
@@ -309,6 +300,9 @@ def process_images_parquet(parquet_path, segment=False, batch_size=BATCH_SIZE, e
 
     print("✅ Finished processing Parquet file.")
 
+
+
+
 def flush_embeddings(batch_embeddings, batch_urls):
     """Append a batch of embeddings and URLs to existing .npy files."""
     # Handle embeddings
@@ -329,13 +323,73 @@ def flush_embeddings(batch_embeddings, batch_urls):
 
     print(f"💾 Flushed {len(batch_embeddings)} embeddings. Total now: {embeddings_array.shape[0]}")
 
-def main():
-    path = "data/data_vogue_final_reviews.parquet"
-    process_images_parquet(path, segment=True)
+def main(extractor):
+    #path = "data/data_vogue_final_reviews.parquet"
+    process_image_parquet_replaced("data/data_vogue_final_with_images_sampled.parquet", extractor=extractor)
 
+
+
+
+
+def load_extractor(extractor):
+    if extractor == "fashion_clip":
+        config = {
+            "embeddings_path": "data/embeddings/fashion_clip.npy",
+            "urls_path": "data/embeddings/image_urls.npy",
+            "model_name": "patrickjohncyh/fashion-clip",
+        }
+
+        model = CLIPModel.from_pretrained(config["model_name"]).to(device)
+        processor = CLIPProcessor.from_pretrained(config["model_name"])
+
+        return model, processor, config
+
+    elif extractor == "vit":
+        config = {
+            "embeddings_path": "data/embeddings/vit_embeddings_segmented.npy",
+            "urls_path": "data/embeddings/vit_image_urls_segmented.npy",
+            "model_name": "vit_base_patch16_224",
+        }
+
+        model = timm.create_model(
+            config["model_name"],
+            pretrained=True,
+            num_classes=0,
+            global_pool="avg"
+        ).to(device)
+        model.eval()
+
+        return model, None, config
+
+    else:
+        raise ValueError(f"Unknown extractor: {extractor!r}")
 
 
 if __name__ == "__main__":
-    main()
+    extractor = "fashion_clip"  # or "vit"
+    model, processor, cfg = load_extractor(extractor)
+
+    # Set global paths cleanly
+    EMBEDDINGS_PATH = cfg["embeddings_path"]
+    URLS_PATH = cfg["urls_path"]
+
+    print(f"🚀 Using extractor: {extractor}")
+    print(f"📁 Embeddings → {EMBEDDINGS_PATH}")
+    print(f"📁 URLs → {URLS_PATH}")
+
+    main(extractor)
+
+    extractor = "vit"  # or "vit"
+    model, processor, cfg = load_extractor(extractor)
+
+    # Set global paths cleanly
+    EMBEDDINGS_PATH = cfg["embeddings_path"]
+    URLS_PATH = cfg["urls_path"]
+
+    print(f"🚀 Using extractor: {extractor}")
+    print(f"📁 Embeddings → {EMBEDDINGS_PATH}")
+    print(f"📁 URLs → {URLS_PATH}")
+
+    main(extractor)
 
 
